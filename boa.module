@@ -1,0 +1,388 @@
+<?php
+
+function is_boa_admin() {
+	global $user;
+	return in_array('administrator', $user->roles) || in_array('boa_admin', $user->roles);
+}
+
+function is_boa_demo() {
+	global $user;
+	return in_array('boa_demo', $user->roles);
+}
+
+function is_boa_user() {
+	global $user;
+	return in_array('boa_user', $user->roles);
+}
+
+function is_valid_input($id) {
+	$query = db_select('boa_input', 'r');
+	$query->fields('r', array('id'));
+	$query->condition('id', $id);
+	if (!is_boa_admin()) {
+		$query->condition('enabled', 1);
+		$query->condition('id', 1, '>');
+	}
+	$query->isNotNull('path');
+	$result = $query->execute();
+	return $result->rowCount() == 1;
+}
+
+function invalid_input() {
+	drupal_set_message(t('Invalid input: input ID does not exist or is not enabled.'), 'error');
+	drupal_exit();
+}
+
+function boa_date($timestamp) {
+	return format_date($timestamp, 'custom', 'r');
+}
+
+function formatBytes($size) {
+	if ($size == 0)
+		return '0 bytes';
+	$suffixes = array(' bytes', 'k', 'M', 'G');
+
+	$base = log($size) / log(1024);
+	return round(pow(1024, $base - floor($base)), 2) . $suffixes[floor($base)];
+}
+
+function fakeRunning($record) {
+	if (is_boa_admin())
+		return;
+
+	if ($record->compiler_status == 2 && $record->compile_end > time()) {
+		$record->compiler_status = 1;
+		$record->hadoop_status = 0;
+	}
+	if ($record->hadoop_status == 2 && $record->hadoop_end > time())
+		$record->hadoop_status = 1;
+}
+
+function boa_duration($length) {
+	$s = "";
+	if ($length > 3600) {
+		$s .= (floor($length / 3600)) . "h ";
+		$length = $length % 3600;
+	}
+	if (strlen($s) > 0 || $length > 60) {
+		$s .= (floor($length / 60)) . "m ";
+		$length = $length % 60;
+	}
+	return $s . "{$length}s";
+}
+
+function isValidJob($jobId) {
+	global $user;
+
+	$query = db_select('boa_jobs', 'r');
+	$query->fields('r', array('id'));
+	if (!is_boa_admin()) {
+		$query->condition('uid', $user->uid);
+		$query->condition('deleted', 0);
+	}
+	$query->condition('id', $jobId);
+	$result = $query->execute();
+
+	return $result->rowCount() == 1;
+}
+
+function invalidJob($jobId) {
+	drupal_set_message(t('Invalid job :jobid or this job does not belong to you.', array(':jobid' => $jobId)), 'error');
+	drupal_goto('boa/jobs');
+	drupal_exit();
+}
+
+function showStatus($status) {
+	switch ($status) {
+		default:
+		case 0: return t('Waiting');
+		case 1: return t('Running');
+		case 2: return t('Finished');
+		case 3: return t('Stopping');
+		case -1: return t('Error');
+		case -2: return t('Killed');
+	}
+}
+
+function boa_public_access($jobId) {
+	if (is_boa_admin())
+		return true;
+
+	$query = db_select('boa_jobs', 'r');
+	$query->fields('r', array('id'));
+	$query->condition('public', 1);
+	$query->condition('deleted', 0);
+	$query->condition('id', $jobId);
+	$result = $query->execute();
+
+	return $result->rowCount() == 1;
+}
+
+function boa_output_access($jobId) {
+	$query = db_select('boa_jobs', 'r');
+	$query->join('boa_output', 'o', 'r.id = o.id');
+	$query->fields('r', array('hadoop_status', 'compiler_status'));
+	$query->addExpression('unix_timestamp(compile_end)', 'compile_end');
+	$query->addExpression('unix_timestamp(hadoop_end)', 'hadoop_end');
+	$query->addExpression('COALESCE(o.length, 0)', 'length');
+	$query->condition('r.id', $jobId);
+	$result = $query->execute();
+
+	if ($result->rowCount() == 0)
+		return false;
+
+	$record = $result->fetchObject();
+	fakeRunning($record);
+
+	return $record->hadoop_status == 2 && $record->length > 0;
+}
+
+function boa_job_not_deleted_access($jobId) {
+	$query = db_select('boa_jobs', 'r');
+	$query->fields('r', array('id'));
+	$query->condition('deleted', 0);
+	$query->condition('id', $jobId);
+	$result = $query->execute();
+
+	return $result->rowCount() == 1;
+}
+
+function boa_job_stopped_access($jobId) {
+	return !boa_job_running_access($jobId);
+}
+
+function boa_job_resubmit_access($jobId) {
+	$query = db_select('boa_jobs', 'j');
+	$query->join('boa_input', 'i', 'j.input = i.id');
+	$query->fields('i', array('enabled'));
+	$query->isNotNull('path');
+	$query->isNotNull('compiler_path');
+	$query->condition('j.id', $jobId);
+	$result = $query->execute();
+	if ($result->rowCount() == 0) return false;
+	$record = $result->fetchObject();
+
+	if (!$record->enabled && !is_boa_admin())
+		return false;
+
+	return !boa_job_running_access($jobId);
+}
+
+function boa_job_running_access($jobId) {
+	$query = db_select('boa_jobs', 'r');
+	$query->fields('r', array('hadoop_status', 'compiler_status'));
+	$query->addExpression('unix_timestamp(compile_end)', 'compile_end');
+	$query->addExpression('unix_timestamp(hadoop_end)', 'hadoop_end');
+	$query->condition('id', $jobId);
+	$result = $query->execute();
+
+	if ($result->rowCount() == 0)
+		return false;
+
+	$record = $result->fetchObject();
+	fakeRunning($record);
+
+	return $record->compiler_status == 0 || $record->compiler_status == 1 ||
+			($record->compiler_status == 2 && ($record->hadoop_status == 0 || $record->hadoop_status == 1));
+}
+
+function boa_user_access() {
+	global $user;
+	return is_boa_user() || is_boa_demo() || is_boa_admin();
+}
+
+/**
+ * Implements hook_menu().
+ */
+function boa_menu() {
+	$items['boa/run'] = array(
+		'title' => t('Run Examples'),
+		'description' => t('Run Boa examples.'),
+		'weight' => -1,
+		'menu_name' => 'main-menu',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('boa_run_form'),
+		'access callback' => 'boa_user_access',
+		'file' => 'run.inc',
+	);
+
+	$items['boa/jobs'] = array(
+		'title' => t('Job List'),
+		'description' => t('View all jobs you have submitted.'),
+		'menu_name' => 'main-menu',
+		'page callback' => 'boa_jobs',
+		'access callback' => 'boa_user_access',
+		'file' => 'jobs.inc',
+	);
+
+	$items['boa/running'] = array(
+		'title' => t('Running Job List'),
+		'description' => t('View all currently running jobs.'),
+		'menu_name' => 'main-menu',
+		'page callback' => 'boa_running',
+		'access callback' => 'is_boa_admin',
+		'file' => 'running.inc',
+	);
+
+	$items['boa/search/%'] = array(
+		'title' => t('Search Results'),
+		'description' => t('Find jobs you have submitted by keyword.'),
+		'page callback' => 'boa_search_results',
+		'page arguments' => array(2),
+		'access callback' => 'boa_user_access',
+		'file' => 'search.inc',
+	);
+
+	$items['boa/search'] = array(
+		'title' => t('Job Search'),
+		'description' => t('Find jobs you have submitted by keyword.'),
+		'menu_name' => 'main-menu',
+		'page callback' => 'boa_search',
+		'access callback' => 'boa_user_access',
+		'file' => 'search.inc',
+	);
+
+	$items['boa/job/%'] = array(
+		'title' => t('Job Status'),
+		'page callback' => 'boa_job',
+		'page arguments' => array(2),
+		'access callback' => 'boa_user_access',
+		'type' => MENU_CALLBACK,
+		'file' => 'job.inc',
+	);
+
+	$items['boa/job/%/view'] = array(
+		'title' => t('Job Status'),
+		'page callback' => 'boa_job',
+		'page arguments' => array(2),
+		'access callback' => 'boa_user_access',
+		'type' => MENU_DEFAULT_LOCAL_TASK,
+		'file' => 'job.inc',
+	);
+
+	$items['boa/job/%/output'] = array(
+		'title' => t('View Job Output'),
+		'weight' => 1,
+		'page callback' => 'boa_job_output',
+		'page arguments' => array(2, false),
+		'access callback' => 'boa_output_access',
+		'access arguments' => array(2),
+		'type' => MENU_LOCAL_TASK,
+		'file' => 'job.output.inc',
+	);
+
+	$items['boa/job/%/download'] = array(
+		'title' => t('Download Job Output'),
+		'weight' => 5,
+		'page callback' => 'boa_job_download',
+		'page arguments' => array(2, true),
+		'access callback' => 'boa_output_access',
+		'access arguments' => array(2),
+		'type' => MENU_LOCAL_TASK,
+		'file' => 'job.download.inc',
+	);
+
+	$items['boa/job/%/download-src'] = array(
+		'title' => t('Download Source Code'),
+		'weight' => 5,
+		'page callback' => 'boa_job_download_src',
+		'page arguments' => array(2),
+		'access callback' => 'boa_user_access',
+		'file' => 'job.download.src.inc',
+	);
+
+	$items['boa/job/%/stop'] = array(
+		'title' => t('Stop Job'),
+		'weight' => -5,
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('boa_job_stop', 2),
+		'access callback' => 'boa_job_running_access',
+		'access arguments' => array(2),
+		'type' => MENU_LOCAL_ACTION,
+		'file' => 'job.stop.inc',
+	);
+
+	$items['boa/job/%/delete'] = array(
+		'title' => t('Delete Job'),
+		'weight' => 1,
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('boa_job_delete', 2),
+		'access callback' => 'boa_job_not_deleted_access',
+		'access arguments' => array(2),
+		'type' => MENU_LOCAL_ACTION,
+		'file' => 'job.delete.inc',
+	);
+
+	$items['boa/job/%/resubmit'] = array(
+		'title' => t('Resubmit Job'),
+		'weight' => -3,
+		'page callback' => 'boa_job_resubmit',
+		'page arguments' => array(2),
+		'access callback' => 'boa_job_resubmit_access',
+		'access arguments' => array(2),
+		'type' => MENU_LOCAL_ACTION,
+		'file' => 'job.resubmit.inc',
+	);
+
+	$items['boa/job/%/edit'] = array(
+		'title' => t('Edit Source Code'),
+		'weight' => -1,
+		'page callback' => 'boa_job_edit',
+		'page arguments' => array(2),
+		'access callback' => 'boa_user_access',
+		'access arguments' => array(2),
+		'file' => 'job.edit.inc',
+	);
+
+	$items['boa/job/public/%'] = array(
+		'title' => t('Boa Job Status'),
+		'page callback' => 'boa_public_view',
+		'page arguments' => array(3),
+		'access callback' => 'boa_public_access',
+		'access arguments' => array(3),
+		'type' => MENU_CALLBACK,
+		'file' => 'public.view.inc',
+	);
+
+	$items['boa/job/public/%/download'] = array(
+		'title' => t('Download Job Output'),
+		'weight' => 5,
+		'page callback' => 'boa_public_download',
+		'page arguments' => array(3),
+		'access callback' => 'boa_public_access',
+		'access arguments' => array(3),
+		'type' => MENU_LOCAL_TASK,
+		'file' => 'public.download.inc',
+	);
+
+	$items['boa/job/%/public'] = array(
+		'title' => t('Make Job Public'),
+		'weight' => -1,
+		'page callback' => 'boa_job_public',
+		'page arguments' => array(2),
+		'access callback' => 'boa_job_not_deleted_access',
+		'access arguments' => array(2),
+		'file' => 'job.public.inc',
+	);
+
+	$items['boa/job/%/private'] = array(
+		'title' => t('Make Job Private'),
+		'weight' => -1,
+		'page callback' => 'boa_job_private',
+		'page arguments' => array(2),
+		'access callback' => 'boa_job_not_deleted_access',
+		'access arguments' => array(2),
+		'file' => 'job.public.inc',
+	);
+
+	$items['boa/publicjobs'] = array(
+		'title' => t('List Public Jobs'),
+		'weight' => -1,
+		'page callback' => 'boa_job_list',
+		'access callback' => 'is_boa_admin',
+		'file' => 'public.list.inc',
+	);
+
+	return $items;
+}
+

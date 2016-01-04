@@ -1,0 +1,6 @@
+name = Boa
+description = The Boa infrastructure.
+package = Boa
+version = 7.x
+core = 7.x
+project = "boa"
