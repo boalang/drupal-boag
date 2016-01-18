@@ -46,7 +46,7 @@ function boa_job($jobId) {
 	else
 		$content .= '<b>Job is PRIVATE</b>: <a href="?q=boa/job/' . $record->id . '/public">Make Public</a><br/>';
 	if ($user->uid != $record->uid)
-		$content .= '<b>Created By:</b> ' . user_load($record->uid)->name . '<br/>';
+		$content .= '<b>Created By:</b> <a href="?q=user/' . $record->uid . '">' . user_load($record->uid)->name . '</a><br/>';
 	$content .= '<b>Created At:</b> ' . boa_date($record->created) . '<br/>';
 	$content .= '<br/>';
 	$content .= '<b>Input Dataset:</b> ' . $record->name . '<br/>';
