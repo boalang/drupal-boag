@@ -61,7 +61,7 @@ function _print_table($table) {
 					$content .= "</pre>\n";
 				$content .= "<pre>";
 			}
-			$content .= '<b>' . str_replace('[] = ', '</b> = ', $row) . "\n";
+			$content .= '<b>' . str_replace('[] = ', '</b> = ', htmlspecialchars($row)) . "\n";
 			$prevTable = false;
 			$last = $cur;
 			continue;
