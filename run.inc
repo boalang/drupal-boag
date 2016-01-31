@@ -165,7 +165,7 @@ function boa_run_form_submit($form, &$form_state) {
 		drupal_exit();
 	}
 
-	$running = _run_count($user->uid);
+	$running = job_run_count($user->uid);
 
 	$query = db_insert('boa_jobs');
 	$tz = date_default_timezone_get();
@@ -190,21 +190,10 @@ function boa_run_form_submit($form, &$form_state) {
 	drupal_set_message(t('Your job was submitted.  Please note it can take several minutes to get results, depending on server load.'));
 	if ($running > 0)
 		drupal_set_message(t('You have other job(s) running.  This job will queue until those jobs finish or are stopped.'));
+	if (job_run_count() > 3)
+		drupal_set_message(t('Server load is currently high.  It will take some time for this job to finish.'));
 	drupal_goto("boa/job/$id");
 	drupal_exit();
-}
-
-function _run_count($uid) {
-	if (is_boa_admin() || is_boa_demo())
-		return 0;
-
-	$query = db_select('boa_jobs', 'j');
-	$query->condition('hadoop_status', '1');
-	$query->condition('uid', $uid);
-	$query->addExpression('COUNT(id)', 'running');
-	$result = $query->execute();
-	$record = $result->fetchObject();
-	return $record->running;
 }
 
 function _run_rpc($source, $input) {

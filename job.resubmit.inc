@@ -27,12 +27,19 @@ function _job_resubmit($jobId) {
 }
 
 function boa_job_resubmit($jobId) {
+	global $user;
+
 	if (!isValidJob($jobId))
 		invalidJob($jobId);
 
+	$running = job_run_count($user->uid);
 	_job_resubmit($jobId);
 
 	drupal_set_message('Your job was re-submitted.  Please note it can take several minutes to get results, depending on server load.');
+	if ($running > 0)
+		drupal_set_message(t('You have other job(s) running.  This job will queue until those jobs finish or are stopped.'));
+	if (job_run_count() > 3)
+		drupal_set_message(t('Server load is currently high.  It will take some time for this job to finish.'));
 	drupal_goto("boa/job/$jobId");
 	drupal_exit();
 }

@@ -15,6 +15,11 @@ function is_boa_user() {
 	return in_array('boa_user', $user->roles);
 }
 
+function is_boa_throttled() {
+	global $user;
+	return in_array('boa_throttled', $user->roles);
+}
+
 function is_valid_input($id) {
 	$query = db_select('boa_input', 'r');
 	$query->fields('r', array('id'));
@@ -31,6 +36,20 @@ function is_valid_input($id) {
 function invalid_input() {
 	drupal_set_message(t('Invalid input: input ID does not exist or is not enabled.'), 'error');
 	drupal_exit();
+}
+
+function job_run_count($uid = null) {
+	if ($uid !== null && !is_boa_throttled())
+		return 0;
+
+	$query = db_select('boa_jobs', 'j');
+	$query->condition('hadoop_status', '1');
+	if ($uid !== null)
+		$query->condition('uid', $uid);
+	$query->addExpression('COUNT(id)', 'running');
+	$result = $query->execute();
+	$record = $result->fetchObject();
+	return $record->running;
 }
 
 function boa_date($timestamp) {
