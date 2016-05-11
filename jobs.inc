@@ -159,6 +159,9 @@ function boa_jobs() {
 		//else if ($data->enabled)
 		//	$actionList[] = "[<a href=\"?q=boa/job/{$data->id}/resubmit\">" . t('resubmit') . '</a>]';
 
+		if ($data->hadoop_status == 1)
+			$actionList[] = "[<a href=\"?q=boa/job/{$data->id}/status\">" . t('status') . '</a>]';
+
 		//if (!$data->deleted)
 		//	$actionList[] = "[<a href=\"?q=boa/job/{$data->id}/delete\">" . t('delete') . '</a>]';
 

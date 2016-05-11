@@ -226,7 +226,7 @@ function generate_content($jobId) {
 		$content .= '<h2>Execution</h2>';
 		$content .= '<b>Status:</b> ' . showStatus($record->hadoop_status);
 		if ($record->hadoop_status == 0 || $record->hadoop_status == 1)
-			$content .= '<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>';
+			$content .= '<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>' . '[<a href="?q=boa/job/' . $jobId . '/status">' . t('status') . '</a>]';
 		$content .= '<br/>';
 		if ($record->hadoop_status == 1)
 			$content .= '<b>Started:</b> ' . boa_date($record->hadoop_start) . ' (' . boa_duration(time() - $record->hadoop_start) .')<br/>';

@@ -50,7 +50,7 @@ function boa_running() {
 			'<a title="' . htmlspecialchars(trim($data->source)) . '" href="?q=boa/job/' . $data->id . '">' . $data->id . '</a>',
 			$data->submitted,
 			$data->name,
-			"[<a href=\"?q=boa/job/{$data->id}/stop\">" . t('stop') . '</a>]',
+			"[<a href=\"?q=boa/job/{$data->id}/stop\">" . t('stop') . '</a>] [<a href="?q=boa/job/' . $data->id . '/status">' . t('status') . '</a>]',
 		);
 
 	$options = array(

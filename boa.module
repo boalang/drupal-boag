@@ -137,6 +137,16 @@ function boa_public_access($jobId) {
 	return $result->rowCount() == 1;
 }
 
+function boa_status_access($jobId) {
+	$query = db_select('boa_jobs', 'r');
+	$query->fields('r', array('id'));
+	$query->condition('hadoop_status', 1);
+	$query->condition('id', $jobId);
+	$result = $query->execute();
+
+	return $result->rowCount() == 1;
+}
+
 function boa_output_access($jobId) {
 	$query = db_select('boa_jobs', 'r');
 	$query->join('boa_output', 'o', 'r.id = o.id');
@@ -400,6 +410,17 @@ function boa_menu() {
 		'page callback' => 'boa_job_list',
 		'access callback' => 'is_boa_admin',
 		'file' => 'public.list.inc',
+	);
+
+	$items['boa/job/%/status'] = array(
+		'title' => t('Execution Status'),
+		'weight' => 5,
+		'page callback' => 'boa_job_status',
+		'page arguments' => array(2),
+		'access callback' => 'boa_status_access',
+		'access arguments' => array(2),
+		'type' => MENU_LOCAL_TASK,
+		'file' => 'job.status.inc',
 	);
 
 	return $items;
