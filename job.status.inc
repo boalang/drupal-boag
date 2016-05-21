@@ -17,7 +17,11 @@ function boa_job_status($jobId) {
 	$record = $query->execute()->fetchObject();
 
 	if ($record->hadoop_status == 1) {
-		preg_match('/Job ID: (job_\d+_\d+)/s', $record->hadoop_output, $matches);
+		if (!preg_match('/Job ID: (job_\d+_\d+)/s', $record->hadoop_output, $matches)) {
+			drupal_set_message(t('Unable to view execution status.'), 'error');
+			drupal_goto("boa/job/$jobId");
+			drupal_exit();
+		}
 
 		set_time_limit(0);
 		exec("/home/hadoop/hadoop-current/bin/hadoop job -status ${matches[1]}", $out);
