@@ -31,7 +31,7 @@ function boa_job($jobId) {
 	$content = '';
 
 	if ($record->parent_id > 0)
-		$content .= '(based on Job <a href="?q=boa/job/' . $record->parent_id . '">' . $record->parent_id . '</a>)<br/><br/>';
+		$content .= '(based on Job <a href="?q=boa/job/' . $record->parent_id . '">' . $record->parent_id . '</a> (<a href="?q=boa/job/' . $jobId . '/diff/' . $record->parent_id . '">diff</a>))<br/><br/>';
 
 	fakeRunning($record);
 

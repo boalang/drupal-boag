@@ -423,6 +423,16 @@ function boa_menu() {
 		'file' => 'job.status.inc',
 	);
 
+	$items['boa/job/%/diff/%'] = array(
+		'title' => t('Diff'),
+		'weight' => 5,
+		'page callback' => 'boa_job_diff',
+		'page arguments' => array(2, 4),
+		'access callback' => 'boa_user_access',
+		'access arguments' => array(2),
+		'file' => 'job.diff.inc',
+	);
+
 	return $items;
 }
 
