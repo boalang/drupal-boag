@@ -4,10 +4,12 @@ require_once 'class.Diff.php';
 
 function boa_job_diff($jobId, $oldJobId) {
 	if (!isValidJob($jobId))
-		invalidJob($jobId);
+		if (!boa_public_access($jobId))
+			invalidJob($jobId);
 
 	if (!isValidJob($oldJobId))
-		invalidJob($oldJobId);
+		if (!boa_public_access($oldJobId))
+			invalidJob($oldJobId);
 
 	$jobSrc = getSrc($jobId);
 	$oldJobSrc = getSrc($oldJobId);

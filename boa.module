@@ -92,6 +92,7 @@ function boa_duration($length) {
 
 function isValidJob($jobId) {
 	global $user;
+	if ($user === null) return false;
 
 	$query = db_select('boa_jobs', 'r');
 	$query->fields('r', array('id'));
@@ -121,6 +122,12 @@ function showStatus($status) {
 		case -1: return t('Error');
 		case -2: return t('Killed');
 	}
+}
+
+function boa_job_access($jobId, $jobId2 = null) {
+	if ($jobId2 !== null && !boa_job_access($jobId2)) return false;
+	if (isValidJob($jobId)) return true;
+	return boa_public_access($jobId);
 }
 
 function boa_public_access($jobId) {
@@ -359,7 +366,6 @@ function boa_menu() {
 		'page callback' => 'boa_job_edit',
 		'page arguments' => array(2),
 		'access callback' => 'boa_user_access',
-		'access arguments' => array(2),
 		'file' => 'job.edit.inc',
 	);
 
@@ -428,8 +434,8 @@ function boa_menu() {
 		'weight' => 5,
 		'page callback' => 'boa_job_diff',
 		'page arguments' => array(2, 4),
-		'access callback' => 'boa_user_access',
-		'access arguments' => array(2),
+		'access callback' => 'boa_job_access',
+		'access arguments' => array(2, 4),
 		'file' => 'job.diff.inc',
 	);
 
