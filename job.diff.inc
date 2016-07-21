@@ -29,6 +29,7 @@ function boa_job_diff($jobId, $oldJobId) {
 	white-space: pre-wrap;
 	font-family: Consolas,'Courier New',Courier,monospace;
 	font-size: 0.75em;
+	border-left: 1px solid #fff;
 }
 .diff td:last-child {
 	border-left: 1px solid #000;
@@ -50,10 +51,6 @@ function boa_job_diff($jobId, $oldJobId) {
 .diffInserted {
 	border: 1px solid rgb(192,255,192);
 	background: rgb(224,255,224);
-}
-
-#toStringOutput {
-	margin: 0 2em 2em;
 }
 </style>
 </head>
