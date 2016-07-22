@@ -18,7 +18,19 @@ function boa_job_diff($jobId, $oldJobId) {
 <html>
 <head>
 <style type="text/css">
+.titlebar {
+	position: fixed;
+	top: 0px;
+	width: 50%;
+	height: 1.5em;
+	background-color: #fff;
+	margin-top: 0px;
+	border-bottom: 1px solid #000;
+	line-height: 1.5em;
+}
+
 .diff {
+	margin-top: 3em;
     border-collapse: collapse;
 }
 
@@ -56,7 +68,7 @@ function boa_job_diff($jobId, $oldJobId) {
 </head>
 
 <body>
-<h1>Diff from job $oldJobId to job $jobId</h1>
+<h1 class="titlebar">Diff from job <a href="?q=boa/job/$oldJobId">$oldJobId</a></h1><h1 class="titlebar" style="left: 50%;">to job <a href="?q=boa/job/$jobId">$jobId</a></h1>
 HTML;
 
 	echo Diff::toTable(Diff::compare($oldJobSrc, $jobSrc));
