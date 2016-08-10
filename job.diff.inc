@@ -30,11 +30,13 @@ function boa_job_diff($jobId, $oldJobId) {
 }
 
 .diff {
+	width: 100%;
 	margin-top: 3em;
     border-collapse: collapse;
 }
 
 .diff td {
+	width: 50%;
 	padding: 0 1em;
 	vertical-align: top;
 	white-space: pre;
