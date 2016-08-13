@@ -5,6 +5,11 @@ function boa_job_list() {
 
 	$header = array(
 		array(
+			'data' => t('User'),
+			'field' => 'u.name',
+			'descending' => false,
+		),
+		array(
 			'data' => t('Id'),
 			'field' => 'id',
 			'sort' => 'desc',
@@ -22,39 +27,23 @@ function boa_job_list() {
 			'sort' => 'desc',
 			'descending' => true,
 		),
-		array(
-			'data' => t('Compile Status'),
-			'field' => 'compiler_status',
-			'sort' => 'desc',
-			'descending' => true,
-		),
-		array(
-			'data' => t('Run Status'),
-			'field' => 'hadoop_status',
-			'sort' => 'desc',
-			'descending' => true,
-		),
 	);
-	array_unshift($header, array('data' => t('User'), 'field' => 'u.name'));
-
-	$deleted = is_boa_admin() && isset($_GET['deleted']) && $_GET['deleted'];
 
 	$query = db_select('boa_jobs', 'j');
+
 	$query->join('boa_output', 'o', 'j.id = o.id');
 	$query->join('boa_input', 'i', 'j.input = i.id');
 	$query->join('users', 'u', 'j.uid = u.uid');
-	$query->fields('j', array('id', 'submitted', 'deleted', 'compiler_status', 'hadoop_status'));
-	$query->fields('i', array('name', 'enabled'));
+
+	$query->fields('j', array('id', 'submitted'));
+	$query->fields('i', array('name'));
 	$query->addField('u', 'name', 'username');
-	$query->addField('i', 'id', 'inputid');
-	$query->addExpression('COALESCE(o.length, 0) > 0', 'has_result');
-	$query->addExpression('COALESCE(o.length, 0)', 'length');
 	$query->addExpression('substring_index(source, \'\n\', 20)', 'source');
-	$query->addExpression('unix_timestamp(compile_end)', 'compile_end');
-	$query->addExpression('unix_timestamp(hadoop_end)', 'hadoop_end');
 	$query->condition('deleted', false);
-	$user_data = field_get_items('user', user_load($user->uid), 'field_table_rows');
-	$query->condition('j.public', true);
+	$query->condition('public', true);
+	$query->condition('hadoop_status', 2);
+	$query->where('COALESCE(o.length, 0) > 0');
+
 	$user_data = field_get_items('user', user_load($user->uid), 'field_table_rows');
 	$maxRows = empty($user_data) ? 10 : $user_data[0]['value'];
 	$query = $query->extend('TableSort')->orderByHeader($header)->extend('PagerDefault')->limit($maxRows);
@@ -63,19 +52,14 @@ function boa_job_list() {
 
 	$rows = array();
 	while ($data = $result->fetchObject()) {
-		$actionList = array();
-
 		fakeRunning($data);
 
-		$rowdata = array(
-			'<a title="' . htmlspecialchars(trim($data->source)) . '" href="?q=boa/job/' . $data->id . '">' . $data->id . '</a>',
+		$rows[] = array(
+			$data->username,
+			'<a title="' . htmlspecialchars(trim($data->source)) . '" href="?q=boa/job/public/' . $data->id . '">' . $data->id . '</a>',
 			$data->submitted,
 			$data->name,
-			showStatus($data->compiler_status),
-			showStatus($data->hadoop_status),
 		);
-		array_unshift($rowdata, $data->username);
-		$rows[] = $rowdata;
 	}
 
 	$options = array(
@@ -85,7 +69,7 @@ function boa_job_list() {
 		'sticky' => true,
 		'caption' => NULL,
 		'colgroups' => array(),
-		'empty' => t('No jobs have been submitted yet.')
+		'empty' => t('There are currently no matching public jobs.')
 	);
 
 	return theme_table($options).theme('pager');
