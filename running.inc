@@ -38,7 +38,7 @@ function boa_running() {
 	$query->fields('i', array('name'));
 	$query->addField('u', 'name', 'username');
 	$query->addExpression('substring_index(j.source, \'\n\', 20)', 'source');
-	$query->condition('j.hadoop_status', '1');
+	$query->where('(j.hadoop_status=1 OR j.compiler_status=1)');
 	$query = $query->extend('TableSort')->orderByHeader($header)->extend('PagerDefault');
 
 	$result = $query->execute();
