@@ -26,7 +26,7 @@ function boa_job_status($jobId) {
 		set_time_limit(0);
 		exec("/home/hadoop/hadoop-current/bin/hadoop job -status ${matches[1]}", $out);
 
-		return '<pre>' . implode("\n", $out) . '</pre>';
+		return '<pre>' . implode("\n", array_splice($out, 4)) . '</pre>';
 	}
 
 	drupal_set_message(t('The job is not currently running.'), 'warning');
