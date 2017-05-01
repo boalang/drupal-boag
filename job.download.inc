@@ -1,40 +1,42 @@
 <?php
 
-function _job_paged_output_rpc($jobId, $start, $len) {
+function _job_output_rpc($jobId) {
+	if (!isValidJob($jobId))
+		invalidJob($jobId);
+
 	$query = db_select('boa_jobs', 'r');
 	$query->join('boa_output', 'o', 'r.id = o.id');
+	$query->addExpression('COALESCE(o.hash, \'\')', 'hash');
 	$query->addExpression('COALESCE(o.length, 0)', 'length');
 	$query->condition('r.id', $jobId);
 
 	$record = $query->execute()->fetchObject();
 
-	if ($len == 0 || $record->length == 0)
-		return "";
+	if (strlen($record->hash) == 0) {
+		drupal_set_message(t('The job has no output.'), 'error');
+		drupal_exit();
+	}
 
-	if ($start < 0) $start = 0;
-	if ($len < 0) $len = $record->length;
+	$dstdir = $jobId . '/' . $record->hash;
+	$filename = "boa-job$jobId-output.txt";
 
-	$tmp = tempnam("/tmp", "boa-output");
-	unlink($tmp);
+	$dir = '/home/boa/www/boa/output/' . $dstdir;
+	$path = $dir . '/' . $filename;
 
-	set_time_limit(0);
-	system("/home/hadoop/hadoop-current/bin/hadoop fs -get /boa/$jobId/output.txt $tmp");
-	$file = fopen($tmp, 'r');
-	if (@fseek($file, $start) === 0)
-		$start = 0;
+	if (!file_exists($path) || $record->length != filesize($path)) {
+		$tmp = tempnam("/tmp", "boa-output");
+		@unlink($tmp);
+		drupal_register_shutdown_function('download_tmp_cleanup', $tmp);
 
-	$output = "";
-	while (!feof($file) && strlen($output) < ($len - $start))
-		$output .= fread($file, 65536);
+		set_time_limit(0);
+		system("/home/hadoop/hadoop-current/bin/hadoop fs -get /boa/$jobId/output.txt $tmp");
 
-	fclose($file);
-	unlink($tmp);
+		@mkdir($dir, 0700, true);
+		rename($tmp, $path);
+		@unlink($tmp);
+	}
 
-	return substr($output, $start, $len);
-}
-
-function _job_output_rpc($jobId) {
-	return _job_paged_output_rpc($jobId, 0, -1);
+	return "http://boa.cs.iastate.edu/boa/output/$dstdir/$filename";
 }
 
 function boa_job_download($jobId) {
