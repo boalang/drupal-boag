@@ -55,8 +55,6 @@ function boa_job_download($jobId) {
 
 	if ($record->hadoop_status == 2) {
 		if ($record->length > 0) {
-			$outputSize = $record->length;
-
 			$tmp = tempnam("/tmp", "boa-output");
 			@unlink($tmp);
 			drupal_register_shutdown_function('download_tmp_cleanup', $tmp);
