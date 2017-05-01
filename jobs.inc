@@ -3,7 +3,9 @@
 function _job_rpc($id) {
 	global $user;
 
-	$query = jobs_query($user->uid);
+	$uid = $user->uid;
+	if (is_boa_admin()) $uid = 0;
+	$query = jobs_query($uid);
 	$query->condition('j.id', $id);
 
 	$result = $query->execute();
@@ -154,7 +156,7 @@ function boa_jobs() {
 		fakeRunning($data);
 
 		if ($data->compiler_status == 0 || $data->compiler_status == 1 || $data->hadoop_status == 1 ||
-		    ($data->compiler_status == 1 && $data->hadoop_status == 0))
+			($data->compiler_status == 1 && $data->hadoop_status == 0))
 			$actionList[] = "[<a href=\"?q=boa/job/{$data->id}/stop\">" . t('stop') . '</a>]';
 		//else if ($data->enabled)
 		//	$actionList[] = "[<a href=\"?q=boa/job/{$data->id}/resubmit\">" . t('resubmit') . '</a>]';
