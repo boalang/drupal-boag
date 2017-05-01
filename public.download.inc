@@ -12,22 +12,22 @@ function boa_public_download($jobId) {
 	$query->fields('r', array('hadoop_status'));
 	$query->addExpression('COALESCE(o.length, 0)', 'length');
 	$query->condition('r.id', $jobId);
-	$result = $query->execute();
 
-	$record = $result->fetchObject();
+	$record = $query->execute()->fetchObject();
 
 	if ($record->hadoop_status == 2) {
 		if ($record->length > 0) {
-			drupal_add_http_header('Content-Type', 'text; utf-8');
-			drupal_add_http_header('Content-Length', $record->length);
-			drupal_add_http_header('Content-Disposition', "attachment; filename=\"boa-job$jobId-output.txt\"");
-
 			$tmp = tempnam("/tmp", "boa-output");
-			unlink($tmp);
+			@unlink($tmp);
+			drupal_register_shutdown_function('download_tmp_cleanup', $tmp);
 
 			set_time_limit(0);
 			system("/home/hadoop/hadoop-current/bin/hadoop fs -get /boa/$jobId/output.txt $tmp");
 			$file = fopen($tmp, 'r');
+
+			drupal_add_http_header('Content-Type', 'text; utf-8');
+			drupal_add_http_header('Content-Length', $record->length);
+			drupal_add_http_header('Content-Disposition', "attachment; filename=\"boa-job$jobId-output.txt\"");
 
 			while (!feof($file)) {
 				print fread($file, 65536);
@@ -49,6 +49,10 @@ function boa_public_download($jobId) {
 	drupal_set_message(t('The job has not successfully finished running.'), 'warning');
 	drupal_goto("boa/job/public/$jobId/view");
 	drupal_exit();
+}
+
+function download_tmp_cleanup($tmp) {
+	@unlink($tmp);
 }
 
 ?>
