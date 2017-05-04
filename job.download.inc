@@ -26,10 +26,8 @@ function _job_output_rpc($jobId) {
 
 	$record = $query->execute()->fetchObject();
 
-	if (strlen($record->hash) == 0) {
-		drupal_set_message(t('The job has no output.'), 'error');
-		drupal_exit();
-	}
+	if (strlen($record->hash) == 0)
+		return t('The job has no output.');
 
 	$dstdir = $jobId . '/' . $record->hash;
 	$filename = "boa-job$jobId-output.txt";
