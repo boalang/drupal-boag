@@ -1,5 +1,19 @@
 <?php
 
+function _job_output_size_rpc($jobId) {
+	if (!isValidJob($jobId))
+		invalidJob($jobId);
+
+	$query = db_select('boa_jobs', 'r');
+	$query->join('boa_output', 'o', 'r.id = o.id');
+	$query->addExpression('COALESCE(o.length, 0)', 'length');
+	$query->condition('r.id', $jobId);
+
+	$record = $query->execute()->fetchObject();
+
+	return $record->length;
+}
+
 function _job_output_rpc($jobId) {
 	if (!isValidJob($jobId))
 		invalidJob($jobId);
