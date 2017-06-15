@@ -20,9 +20,9 @@ function boa_run_form($form, &$form_state) {
 	global $base_path;
 
 	drupal_add_js($base_path . 'sites/all/libraries/ace/src/ace.js');
+	drupal_add_js($base_path . 'sites/all/libraries/ace/src/ext-language_tools.js');
 	drupal_add_js($base_path . 'sites/all/libraries/ace/src/theme-crimson_editor.js');
 	drupal_add_js($base_path . 'sites/all/libraries/ace/src/mode-boa.js');
-	drupal_add_js($base_path . 'sites/all/libraries/ace/src/ext-language_tools.js');
 
 	$form['examples'] = array(
 		'#type' => 'select',
@@ -81,8 +81,8 @@ function boa_run_form($form, &$form_state) {
 <script type="text/javascript">
 <!--//--><![CDATA[//><!--
 var BoaMode = require("ace/mode/boa").Mode;
+ace.require("ace/ext/language_tools");
 function setupAce() {
-	ace.require("ace/ext/language_tools");
 	var editor = ace.edit("source");
 	editor.getSession().setMode(new BoaMode());
 	editor.setTheme("ace/theme/crimson_editor");
@@ -100,6 +100,8 @@ function setupAce() {
 	});
 	editor.setOptions({
 		enableBasicAutocompletion: true,
+		enableSnippets: true,
+		enableLiveAutocompletion: true,
 		minLines: 10,
 		maxLines: 500
 	});
