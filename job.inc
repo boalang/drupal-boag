@@ -246,7 +246,8 @@ function generate_content($jobId) {
 			}
 		}
 		if (strlen($record->hadoop_output) && is_boa_admin())
-			$content .= '<b>Raw Log Output</b><pre class="output">' . trim($record->hadoop_output) . '</pre>';
+			$content .= '<b>Raw Log Output</b><pre class="output">' . preg_replace("/^.*Max block location exceeded for split.*\n/m", '', trim($record->hadoop_output)) . '</pre>';
+
 	}
 
 	return $content;
