@@ -84,14 +84,15 @@ function _print_table($table) {
 }
 
 function _print_row($row) {
-	$cols = explode('[', $row);
-	$last = array_pop($cols);
-	$cols = array_merge($cols, explode(' = ', $last));
+	$splitpos = strpos($row, '] = ');
+	$cols = explode('[', substr($row, 0, $splitpos + 1));
+	$keycount = count($cols) - 1;
+	$cols[] = substr($row, $splitpos + 4);
 
 	$content = '<tr>';
 	for ($i = 0; $i < count($cols); $i++) {
 		$col = $cols[$i];
-		if (substr($col, -1) == ']')
+		if ($i > 0 && $i <= $keycount)
 			$col = trim(substr($col, 0, -1));
 		if ($i == count($cols) - 1)
 			$content .= '<td style="width: 100%;">';
@@ -99,12 +100,12 @@ function _print_row($row) {
 			$content .= '<td style="min-width: 100px;">';
 		if ($i == 0)
 			$content .= '<b>';
-		else if ($i < count($cols) - 1)
+		else if ($i <= $keycount)
 			$content .= '<i>';
 		$content .= htmlspecialchars($col);
 		if ($i == 0)
 			$content .= '</b>';
-		else if ($i < count($cols) - 1)
+		else if ($i < $keycount)
 			$content .= '</i>';
 		$content .= '</td>';
 	}
