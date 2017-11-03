@@ -196,7 +196,9 @@ function generate_content($jobId) {
 
 	# -----------------------------------------------
 
+	$faked = $record->hadoop_status;
 	fakeRunning($record);
+	$faked = $faked != $record->hadoop_status;
 
 	$content = '<h2>Compilation</h2>';
 	$content .= '<b>Status:</b> ' . showStatus($record->compiler_status);
@@ -225,8 +227,11 @@ function generate_content($jobId) {
 	if ($record->compiler_status == 2) {
 		$content .= '<h2>Execution</h2>';
 		$content .= '<b>Status:</b> ' . showStatus($record->hadoop_status);
-		if ($record->hadoop_status == 0 || $record->hadoop_status == 1)
-			$content .= '<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>' . '[<a href="?q=boa/job/' . $jobId . '/status">' . t('status') . '</a>]';
+		if ($record->hadoop_status == 0 || $record->hadoop_status == 1) {
+			$content .= '<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>';
+			if (!$faked)
+				$content .= '[<a href="?q=boa/job/' . $jobId . '/status">' . t('status') . '</a>]';
+		}
 		$content .= '<br/>';
 		if ($record->hadoop_status == 1)
 			$content .= '<b>Started:</b> ' . boa_date($record->hadoop_start) . ' (' . boa_duration(time() - $record->hadoop_start) .')<br/>';
