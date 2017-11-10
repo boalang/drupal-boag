@@ -378,10 +378,11 @@ BOA;
 # ------------------------------------------------------------------------------------ #
 
 $example_names['null-check'] = t('How many fixing revisions added null checks?');
-$example_jobs['null-check'] = 566;
+$example_jobs['null-check'] = 63199;
 $examples['null-check'] = <<<BOA
-p: Project = input;
+# How many fixing revisions added null checks?
 AddedNullCheck: output sum of int;
+p: Project = input;
 
 isfixing := false;
 count := 0;
@@ -416,7 +417,7 @@ visit(p, visitor {
 	before node: Statement -&gt;
 		# increase the counter if there is an IF statement
 		# where the boolean condition is of the form:
-		#	null == expr OR expr == null OR null != expr OR expr != null
+		#   null == expr OR expr == null OR null != expr OR expr != null
 		if (node.kind == StatementKind.IF)
 			visit(node.expression, visitor {
 				before node: Expression -&gt;
@@ -669,30 +670,30 @@ hasMvn := false;
 hasMake := false;
 
 exists (i: int; lowercase(input.programming_languages[i]) == "java")
-    visit(input, visitor {
-        before Project -> TOTAL << 1;
-        after Project -> {
-            if (hasAnt) ANT << 1;
-            if (hasGradle) GRADLE << 1;
-            if (hasMvn) MAVEN << 1;
-            if (hasMake) MAKE << 1;
-            if (!(hasAnt || hasGradle || hasMvn || hasMake)) NONE << 1;
-        }
-        before node: CodeRepository -> {
-            snapshot := getsnapshot(node);
-            for (j := 0; j < len(snapshot); j++) {
-                if (match(`/build.xml$`, snapshot[j].name))
-                    hasAnt = true;
-                else if (match(`/build.gradle$`, snapshot[j].name))
-                    hasGradle = true;
-                else if (match(`/pom.xml$`, snapshot[j].name))
-                    hasMvn = true;
-                else if (match(`/makefile$`, lowercase(snapshot[j].name)))
-                    hasMake = true;
-            }
-            stop;
-        }
-    });
+	visit(input, visitor {
+		before Project -&gt; TOTAL &lt;&lt; 1;
+		after Project -&gt; {
+			if (hasAnt) ANT &lt;&lt; 1;
+			if (hasGradle) GRADLE &lt;&lt; 1;
+			if (hasMvn) MAVEN &lt;&lt; 1;
+			if (hasMake) MAKE &lt;&lt; 1;
+			if (!(hasAnt || hasGradle || hasMvn || hasMake)) NONE &lt;&lt; 1;
+		}
+		before node: CodeRepository -&gt; {
+			snapshot := getsnapshot(node);
+			for (j := 0; j &lt; len(snapshot); j++) {
+				if (match(`/build.xml$`, snapshot[j].name))
+					hasAnt = true;
+				else if (match(`/build.gradle$`, snapshot[j].name))
+					hasGradle = true;
+				else if (match(`/pom.xml$`, snapshot[j].name))
+					hasMvn = true;
+				else if (match(`/makefile$`, lowercase(snapshot[j].name)))
+					hasMake = true;
+			}
+			stop;
+		}
+	});
 BOA;
 
 # ------------------------------------------------------------------------------------ #
