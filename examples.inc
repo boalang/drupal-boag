@@ -650,6 +650,40 @@ BOA;
 
 # ------------------------------------------------------------------------------------ #
 
+$example_names['java-build'] = t('How often are popular Java build systems used?');
+$example_jobs['java-build'] = 63193;
+$examples['java-build'] = <<<BOA
+ANT: output sum of int;
+GRADLE: output sum of int;
+MAVEN: output sum of int;
+
+hasAnt := false;
+hasGradle := false;
+hasMvn := false;
+
+visit(input, visitor {
+    before node: Project ->
+        ifall (i: int; lowercase(node.programming_languages[i]) != "java")
+            stop;
+    before node: CodeRepository -> {
+        snapshot := getsnapshot(node);
+        exists (j: int; match(`/build.xml$`, snapshot[j].name))
+            hasAnt = true;
+        exists (k: int; match(`/build.gradle$`, snapshot[k].name))
+            hasGradle = true;
+        exists (l: int; match(`/pom.xml$`, snapshot[l].name))
+            hasMvn = true;
+        stop;
+    }
+});
+
+if (hasAnt) ANT << 1;
+if (hasGradle) GRADLE << 1;
+if (hasMvn) MAVEN << 1;
+BOA;
+
+# ------------------------------------------------------------------------------------ #
+
 $example_options = array(
 	0 => t('-- Select Example --'),
 	'Programming Languages' => array(
@@ -670,6 +704,7 @@ $example_options = array(
 		'churn-rate' => $example_names['churn-rate'],
 		'commits-years' => $example_names['commits-years'],
 		//'word-dist' => $example_names['word-dist'],
+		'java-build' => $example_names['java-build'],
 	),
 	'Legal' => array(
 		'top-license' => $example_names['top-license'],
