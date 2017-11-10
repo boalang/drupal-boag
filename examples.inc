@@ -450,9 +450,9 @@ visit(input, visitor {
 	}
 	before node: ChangedFile -&gt; cur_file = string(node);
 	before node: Method -&gt; {
-	    cur_method = node.name;
-	    push(s, alive);
-	    alive = true;
+		cur_method = node.name;
+		push(s, alive);
+		alive = true;
 	}
 	after node: Method -&gt; alive = pop(s);
 	before node: Statement -&gt; {
@@ -461,21 +461,21 @@ visit(input, visitor {
 			stop;
 		}
 		switch (node.kind) {
-    	    case StatementKind.BREAK: if (def(node.expression)) break;
-    		case StatementKind.RETURN, StatementKind.THROW, StatementKind.CONTINUE:
-    			alive = false;
-    			break;
-    		case StatementKind.IF, StatementKind.LABEL: stop;
-    		case StatementKind.FOR, StatementKind.DO, StatementKind.WHILE,
-    		        StatementKind.SWITCH, StatementKind.TRY:
-    		    foreach (i: int; def(node.statements[i])) {
-                    push(s, alive);
-                    visit(node.statements[i]);
-                    alive = pop(s);
-    		    }
-    			stop;
-    		default:
-    			break;
+			case StatementKind.BREAK: if (def(node.expression)) break;
+			case StatementKind.RETURN, StatementKind.THROW, StatementKind.CONTINUE:
+				alive = false;
+				break;
+			case StatementKind.IF, StatementKind.LABEL: stop;
+			case StatementKind.FOR, StatementKind.DO, StatementKind.WHILE,
+					StatementKind.SWITCH, StatementKind.TRY:
+				foreach (i: int; def(node.statements[i])) {
+					push(s, alive);
+					visit(node.statements[i]);
+					alive = pop(s);
+				}
+				stop;
+			default:
+				break;
 		}
 	}
 });
