@@ -651,35 +651,48 @@ BOA;
 # ------------------------------------------------------------------------------------ #
 
 $example_names['java-build'] = t('How often are popular Java build systems used?');
-$example_jobs['java-build'] = 63193;
+$example_jobs['java-build'] = 63197;
 $examples['java-build'] = <<<BOA
+# How often are popular Java build systems used?
+TOTAL: output sum of int;
+
 ANT: output sum of int;
 GRADLE: output sum of int;
 MAVEN: output sum of int;
+MAKE: output sum of int;
+
+NONE: output sum of int;
 
 hasAnt := false;
 hasGradle := false;
 hasMvn := false;
+hasMake := false;
 
-visit(input, visitor {
-    before node: Project ->
-        ifall (i: int; lowercase(node.programming_languages[i]) != "java")
+exists (i: int; lowercase(input.programming_languages[i]) == "java")
+    visit(input, visitor {
+        before Project -> TOTAL << 1;
+        after Project -> {
+            if (hasAnt) ANT << 1;
+            if (hasGradle) GRADLE << 1;
+            if (hasMvn) MAVEN << 1;
+            if (hasMake) MAKE << 1;
+            if (!(hasAnt || hasGradle || hasMvn || hasMake)) NONE << 1;
+        }
+        before node: CodeRepository -> {
+            snapshot := getsnapshot(node);
+            for (j := 0; j < len(snapshot); j++) {
+                if (match(`/build.xml$`, snapshot[j].name))
+                    hasAnt = true;
+                else if (match(`/build.gradle$`, snapshot[j].name))
+                    hasGradle = true;
+                else if (match(`/pom.xml$`, snapshot[j].name))
+                    hasMvn = true;
+                else if (match(`/makefile$`, lowercase(snapshot[j].name)))
+                    hasMake = true;
+            }
             stop;
-    before node: CodeRepository -> {
-        snapshot := getsnapshot(node);
-        exists (j: int; match(`/build.xml$`, snapshot[j].name))
-            hasAnt = true;
-        exists (k: int; match(`/build.gradle$`, snapshot[k].name))
-            hasGradle = true;
-        exists (l: int; match(`/pom.xml$`, snapshot[l].name))
-            hasMvn = true;
-        stop;
-    }
-});
-
-if (hasAnt) ANT << 1;
-if (hasGradle) GRADLE << 1;
-if (hasMvn) MAVEN << 1;
+        }
+    });
 BOA;
 
 # ------------------------------------------------------------------------------------ #
