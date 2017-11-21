@@ -86,7 +86,7 @@ editor.setHighlightActiveLine(false);
 editor.setShowInvisibles(false);
 editor.setReadOnly(true);
 editor.setOptions({
-	maxLines: 500
+	maxLines: 1000
 });
 //--><!]]>
 </script>
