@@ -103,7 +103,7 @@ function setupAce() {
 		enableSnippets: true,
 		enableLiveAutocompletion: true,
 		minLines: 10,
-		maxLines: 500
+		maxLines: 1000
 	});
 }
 setupAce();
