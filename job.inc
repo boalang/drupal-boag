@@ -102,7 +102,8 @@ CSS;
 
 	# -----------------------------------------------
 
-	$content .= drupal_render(drupal_get_form('update_form', $jobId));
+	$form = drupal_get_form('update_form', $jobId);
+	$content .= drupal_render($form);
 
 	if ($record->compiler_status == 0 || $record->compiler_status == 1) {
 		$wait = 3000;

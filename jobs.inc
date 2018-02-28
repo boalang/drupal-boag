@@ -193,8 +193,10 @@ function boa_jobs() {
 		'empty' => t('No jobs have been submitted yet.')
 	);
 
-	if (is_boa_admin())
-		$options['caption'] = '<a href="index.php?q=boa/running">View currently running jobs</a>' . drupal_render(drupal_get_form('view_user_list', $uid, $deleted));
+	if (is_boa_admin()) {
+		$form = drupal_get_form('view_user_list', $uid, $deleted);
+		$options['caption'] = '<a href="index.php?q=boa/running">View currently running jobs</a>' . drupal_render($form);
+	}
 
 	return theme_table($options).theme('pager');
 }
