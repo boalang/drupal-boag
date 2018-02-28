@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function boa_install() {
+    $roles = user_roles(TRUE);
+
+    if (!in_array('boa_user', $roles)) {
+        $role1 = new stdClass();
+        $role1->name = 'boa_user';
+        user_role_save($role1);
+    }
+    $boa_user_role = user_role_load_by_name('boa_user');
+    $boa_user_role_id = $boa_user_role->rid;
+
+    if (!in_array('boa_admin', $roles)) {
+        $role2 = new stdClass();
+        $role2->name = 'boa_admin';
+        user_role_save($role2);
+    }
+    $boa_admin_role = user_role_load_by_name('boa_admin');
+    $boa_admin_role_id = $boa_admin_role->rid;
+}
+
+?>
