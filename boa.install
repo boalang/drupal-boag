@@ -23,4 +23,207 @@ function boa_install() {
     $boa_admin_role_id = $boa_admin_role->rid;
 }
 
+/**
+ * Implements hook_schema().
+ */
+function boa_schema() {
+    $schema['boa_input'] = array(
+        'description' => 'Boa input datasets.',
+        'primary key' => array(
+            'id',
+        ),
+        'fields' => array(
+            'id' => array(
+                'description' => 'Unique input dataset ID.',
+                'type' => 'serial',
+                'size' => 'big',
+                'not null' => TRUE,
+            ),
+            'name' => array(
+                'description' => 'The dataset name, shown on the web.',
+                'type' => 'varchar',
+                'size' => 50,
+            ),
+            'path' => array(
+                'description' => 'Directory name in HDFS of the dataset.',
+                'type' => 'varchar',
+                'size' => 255,
+            ),
+            'run_opts' => array(
+                'description' => 'Command-line options passed to the Hadoop jar.',
+                'type' => 'varchar',
+                'size' => 255,
+            ),
+            'compiler_path' => array(
+                'description' => 'Directory name for the Boa compiler.',
+                'type' => 'varchar',
+                'size' => 255,
+            ),
+            'enabled' => array(
+                'description' => 'Is the dataset enabled (1) or not (0).',
+                'type' => 'int',
+                'size' => 'tiny',
+                'default' => 1,
+            ),
+        ),
+    );
+
+    $schema['boa_jobs'] = array(
+        'description' => 'A Boa job.',
+        'primary key' => array(
+            'id',
+        ),
+        'fields' => array(
+            'id' => array(
+                'description' => 'Unique job ID.',
+                'type' => 'serial',
+                'not null' => TRUE,
+            ),
+            'uid' => array(
+                'description' => 'The user ID owning this job.',
+                'type' => 'int',
+                'not null' => TRUE,
+            ),
+            'deleted' => array(
+                'description' => 'If this job is deleted (1) or not (0).',
+                'type' => 'int',
+                'size' => 'tiny',
+                'default' => 0,
+            ),
+            'public' => array(
+                'description' => 'If this job is public (1) or private (0).',
+                'type' => 'int',
+                'size' => 'tiny',
+                'default' => 0,
+            ),
+            'source' => array(
+                'description' => 'The source code of the query.',
+                'type' => 'text',
+                'size' => 'medium',
+            ),
+            'created' => array(
+                'description' => 'Unique job ID.',
+                'mysql_type' => 'timestamp DEFAULT CURRENT_TIMESTAMP',
+                'not null' => TRUE,
+            ),
+            'submitted' => array(
+                'description' => 'Unique job ID.',
+                'mysql_type' => 'timestamp',
+            ),
+            'input' => array(
+                'description' => 'The input dataset ID.',
+                'type' => 'int',
+            ),
+            'compiler_status' => array(
+                'description' => 'Current status of the compiler. 0/not started 1/??? 2/??? 3/???.',
+                'type' => 'int',
+                'size' => 'tiny',
+                'default' => 0,
+            ),
+            'compile_start' => array(
+                'description' => 'The time the compiler started.',
+                'mysql_type' => 'timestamp',
+                'not null' => TRUE,
+                'default' => 0,
+            ),
+            'compile_end' => array(
+                'description' => 'The time the compiler finished.',
+                'mysql_type' => 'timestamp',
+                'not null' => TRUE,
+                'default' => 0,
+            ),
+            'compiler_output' => array(
+                'description' => 'The standard output/log of the compiler.',
+                'type' => 'text',
+                'size' => 'medium',
+            ),
+            'hadoop_status' => array(
+                'description' => 'Current status of the Hadoop job. 0/not started 1/??? 2/??? 3/???',
+                'type' => 'int',
+                'size' => 'tiny',
+                'default' => 0,
+            ),
+            'hadoop_start' => array(
+                'description' => 'The time the Hadoop job started.',
+                'mysql_type' => 'timestamp',
+                'not null' => TRUE,
+                'default' => 0,
+            ),
+            'hadoop_end' => array(
+                'description' => 'The time the Hadoop job finished.',
+                'mysql_type' => 'timestamp',
+                'not null' => TRUE,
+                'default' => 0,
+            ),
+            'hadoop_output' => array(
+                'description' => 'The Hadoop job standard output/logs.',
+                'type' => 'text',
+                'size' => 'big',
+            ),
+            'hadoop_id' => array(
+                'description' => 'The Hadoop job ID, if any.',
+                'type' => 'varchar',
+                'length' => 25,
+            ),
+            'parent_id' => array(
+                'description' => 'The parent ID of this job, if any.',
+                'type' => 'int',
+                'size' => 'big',
+            ),
+        ),
+        'indexes' => array(
+            'uid' => array(
+                'uid',
+            ),
+            'job_poller' => array(
+                'compiler_status',
+                'input',
+            ),
+            'hadoop_status' => array(
+                'hadoop_status',
+            ),
+            'caching_job' => array(
+                'input',
+                array('source', 200),
+            ),
+            'publicjobs' => array(
+                'public',
+                'deleted',
+            ),
+        ),
+    );
+
+    // maybe TODO ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=16
+    $schema['boa_output'] = array(
+        'description' => 'Information about the output/results of a job after Hadoop runs.',
+        'primary key' => array(
+            'id',
+        ),
+        'fields' => array(
+            'id' => array(
+                'description' => 'Job ID of this output.',
+                'type' => 'int',
+                'size' => 'big',
+                'not null' => TRUE,
+            ),
+            'length' => array(
+                'description' => 'How many bytes is the full output.',
+                'type' => 'int',
+                'size' => 'big',
+            ),
+            'hash' => array(
+                'description' => 'Hash of the output, used by API to get file contents.',
+                'type' => 'char',
+                'length' => '32',
+            ),
+            'web_result' => array(
+                'description' => 'First part of the output, to display on the web.',
+                'type' => 'text',
+            ),
+        ),
+    );
+
+    return $schema;
+}
+
 ?>
