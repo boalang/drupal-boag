@@ -1,10 +1,10 @@
 <?php
 
 function boa_search() {
-	return drupal_get_form('search_form');
+	return drupal_get_form('boa_search_form');
 }
 
-function search_form($form, &$form_state) {
+function boa_search_form($form, &$form_state) {
 	$form['search'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Enter a Single Keyword or an Exact Phrase'),
@@ -23,7 +23,7 @@ function search_form($form, &$form_state) {
 	return $form;
 }
 
-function search_form_submit($form, &$form_state) {
+function boa_search_form_submit($form, &$form_state) {
 	if ($form['output']['#value'])
 		drupal_goto('boa/search/!output!' . $form['search']['#value']);
 	else
