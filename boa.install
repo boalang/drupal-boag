@@ -11,16 +11,19 @@ function boa_install() {
         $role1->name = 'boa_user';
         user_role_save($role1);
     }
-    $boa_user_role = user_role_load_by_name('boa_user');
-    $boa_user_role_id = $boa_user_role->rid;
 
     if (!in_array('boa_admin', $roles)) {
         $role2 = new stdClass();
         $role2->name = 'boa_admin';
         user_role_save($role2);
     }
+
+    $users = array(1); // for now, just target the first user, who is always an admin
+    $boa_user_role = user_role_load_by_name('boa_user');
     $boa_admin_role = user_role_load_by_name('boa_admin');
-    $boa_admin_role_id = $boa_admin_role->rid;
+
+    user_multiple_role_edit($users, 'add_role', $boa_user_role->rid);
+    user_multiple_role_edit($users, 'add_role', $boa_admin_role->rid);
 }
 
 /**
