@@ -105,13 +105,15 @@ function boa_schema() {
                 'size' => 'medium',
             ),
             'created' => array(
-                'description' => 'Unique job ID.',
+                'description' => 'The time the job was originally created.',
                 'mysql_type' => 'timestamp DEFAULT CURRENT_TIMESTAMP',
                 'not null' => TRUE,
             ),
             'submitted' => array(
-                'description' => 'Unique job ID.',
+                'description' => 'The time the job was last submitted.',
                 'mysql_type' => 'timestamp',
+                'not null' => TRUE,
+                'default' => 0,
             ),
             'input' => array(
                 'description' => 'The input dataset ID.',
