@@ -111,9 +111,8 @@ function boa_schema() {
             ),
             'submitted' => array(
                 'description' => 'The time the job was last submitted.',
-                'mysql_type' => 'timestamp',
-                'not null' => TRUE,
-                'default' => 0,
+                'mysql_type' => 'timestamp NULL',
+                'default' => null,
             ),
             'input' => array(
                 'description' => 'The input dataset ID.',
@@ -128,14 +127,12 @@ function boa_schema() {
             'compile_start' => array(
                 'description' => 'The time the compiler started.',
                 'mysql_type' => 'timestamp',
-                'not null' => TRUE,
-                'default' => 0,
+                'default' => '1970-01-01 00:00:01',
             ),
             'compile_end' => array(
                 'description' => 'The time the compiler finished.',
                 'mysql_type' => 'timestamp',
-                'not null' => TRUE,
-                'default' => 0,
+                'default' => '1970-01-01 00:00:01',
             ),
             'compiler_output' => array(
                 'description' => 'The standard output/log of the compiler.',
@@ -151,14 +148,12 @@ function boa_schema() {
             'hadoop_start' => array(
                 'description' => 'The time the Hadoop job started.',
                 'mysql_type' => 'timestamp',
-                'not null' => TRUE,
-                'default' => 0,
+                'default' => '1970-01-01 00:00:01',
             ),
             'hadoop_end' => array(
                 'description' => 'The time the Hadoop job finished.',
                 'mysql_type' => 'timestamp',
-                'not null' => TRUE,
-                'default' => 0,
+                'default' => '1970-01-01 00:00:01',
             ),
             'hadoop_output' => array(
                 'description' => 'The Hadoop job standard output/logs.',
