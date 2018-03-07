@@ -45,22 +45,22 @@ function boa_schema() {
             'name' => array(
                 'description' => 'The dataset name, shown on the web.',
                 'type' => 'varchar',
-                'size' => 50,
+                'length' => 50,
             ),
             'path' => array(
                 'description' => 'Directory name in HDFS of the dataset.',
                 'type' => 'varchar',
-                'size' => 255,
+                'length' => 255,
             ),
             'run_opts' => array(
                 'description' => 'Command-line options passed to the Hadoop jar.',
                 'type' => 'varchar',
-                'size' => 255,
+                'length' => 255,
             ),
             'compiler_path' => array(
                 'description' => 'Directory name for the Boa compiler.',
                 'type' => 'varchar',
-                'size' => 255,
+                'length' => 255,
             ),
             'enabled' => array(
                 'description' => 'Is the dataset enabled (1) or not (0).',
