@@ -24,6 +24,17 @@ function boa_install() {
 
     user_multiple_role_edit($users, 'add_role', $boa_user_role->rid);
     user_multiple_role_edit($users, 'add_role', $boa_admin_role->rid);
+
+	$query = db_insert('boa_input');
+	$query->fields(array(
+        'id' => 1,
+		'name' => '--live data--',
+		'path' => 'live',
+		'run_opts' => NULL,
+		'compiler_path' => 'live',
+		'enabled' => 1,
+	));
+	$query->execute();
 }
 
 /**
