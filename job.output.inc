@@ -72,7 +72,7 @@ function _print_table($table) {
 				$content .= "</table>\n";
 			if ($content != '')
 				$content .= "</pre>\n";
-			$content .= "<pre><table>\n";
+			$content .= "<pre><table style=\"display: block; overflow-x: auto; white-space: nowrap;\">\n";
 		}
 		$content .= _print_row($row);
 		$prevTable = true;
