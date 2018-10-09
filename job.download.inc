@@ -52,10 +52,15 @@ function _job_output_rpc($jobId) {
 }
 
 function boa_job_download($jobId) {
-	global $user;
-
 	if (!isValidJob($jobId))
 		invalidJob($jobId);
+	_download_job($jobId, "boa/job/$jobId");
+}
+
+function _download_job($jobId, $fallbackUrl) {
+	global $user;
+
+	set_time_limit(0);
 
 	drupal_set_title(t('Output for Job ') . $jobId);
 
@@ -88,17 +93,18 @@ function boa_job_download($jobId) {
 			}
 
 			fclose($file);
+			unlink($tmp);
 
 			drupal_exit();
 		}
 
 		drupal_set_message(t('The job finished successfully, but has no output.'), 'warning');
-		drupal_goto("boa/job/$jobId");
+		drupal_goto($fallbackUrl);
 		drupal_exit();
 	}
 
 	drupal_set_message(t('The job has not successfully finished running.'), 'warning');
-	drupal_goto("boa/job/$jobId");
+	drupal_goto($fallbackUrl);
 	drupal_exit();
 }
 
