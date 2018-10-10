@@ -41,7 +41,7 @@ function _job_output_rpc($jobId) {
 		drupal_register_shutdown_function('download_tmp_cleanup', $tmp);
 
 		set_time_limit(0);
-		system("/home/hadoop/hadoop-current/bin/hadoop fs -get /boa/$jobId/output.txt $tmp");
+		system("/home/hadoop/hadoop-current/bin/hadoop fs -getmerge /boa/$jobId/ $tmp");
 
 		@mkdir($dir, 0700, true);
 		rename($tmp, $path);
@@ -79,7 +79,7 @@ function _download_job($jobId, $fallbackUrl) {
 			drupal_register_shutdown_function('download_tmp_cleanup', $tmp);
 
 			set_time_limit(0);
-			system("/home/hadoop/hadoop-current/bin/hadoop fs -get /boa/$jobId/output.txt $tmp");
+			system("/home/hadoop/hadoop-current/bin/hadoop fs -getmerge /boa/$jobId/ $tmp");
 			$file = fopen($tmp, 'r');
 
 			drupal_add_http_header('Content-Type', 'text; utf-8');
