@@ -3,16 +3,9 @@
 module_load_include('inc', 'boa', 'examples');
 
 function _get_datasets() {
-	$query = db_select('boa_input', 'r');
-	$query->fields('r', array('id'));
+	$query = get_input_query();
 	$query->addExpression('IF(enabled = 1, name, CONCAT(\'[admin] \', name))', 'name');
 	$query->orderBy('id', 'DESC');
-	if (!is_boa_admin()) {
-		$query->condition('id', 1, '>');
-		$query->condition('enabled', 1);
-	}
-	$query->isNotNull('path');
-	$query->isNotNull('compiler_path');
 	return $query->execute();
 }
 

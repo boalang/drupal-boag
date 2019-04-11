@@ -20,21 +20,26 @@ function is_boa_throttled() {
 	return in_array('boa_throttled', $user->roles);
 }
 
-function is_valid_input($id) {
+function get_input_query() {
 	$query = db_select('boa_input', 'r');
 	$query->fields('r', array('id'));
-	$query->condition('id', $id);
 	if (!is_boa_admin()) {
-		$query->condition('enabled', 1);
 		$query->condition('id', 1, '>');
+		$query->condition('enabled', 1);
 	}
 	$query->isNotNull('path');
+	$query->isNotNull('compiler_path');
+}
+
+function is_valid_input($id) {
+	$query = get_input_query();
+	$query->condition('id', $id);
 	$result = $query->execute();
 	return $result->rowCount() == 1;
 }
 
 function invalid_input() {
-	drupal_set_message(t('Invalid input: input ID does not exist or is not enabled.'), 'error');
+	drupal_set_message(t('Invalid input: input ID does not exist or is not enabled for your user.'), 'error');
 	drupal_exit();
 }
 
