@@ -29,6 +29,7 @@ function get_input_query() {
 	}
 	$query->isNotNull('path');
 	$query->isNotNull('compiler_path');
+	return $query;
 }
 
 function is_valid_input($id) {
