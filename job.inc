@@ -31,7 +31,19 @@ function boa_job($jobId) {
 	$content = '';
 
 	if ($record->parent_id > 0)
-		$content .= '(based on Job <a href="?q=boa/job/' . $record->parent_id . '">' . $record->parent_id . '</a> (<a href="?q=boa/job/' . $jobId . '/diff/' . $record->parent_id . '">diff</a>))<br/><br/>';
+		$content .= '&larr; based on Job <a href="?q=boa/job/' . $record->parent_id . '">' . $record->parent_id . '</a> (<a href="?q=boa/job/' . $jobId . '/diff/' . $record->parent_id . '">diff</a>)<br/>';
+
+	$query2 = db_select('boa_jobs', 'j');
+	$query2->fields('j', array('id', 'uid', 'deleted'));
+	$query2->condition('parent_id', $jobId);
+	$result2 = $query2->execute();
+
+	while ($record2 = $result2->fetchObject())
+		if (is_boa_admin() || ($record2->uid == $user->uid && !$record2->deleted))
+			$content .= '&rarr; modified in Job <a href="?q=boa/job/' . $record2->id . '">' . $record2->id . '</a> (<a href="?q=boa/job/' . $record2->id . '/diff/' . $jobId . '">diff</a>)<br/>';
+
+	if ($record->parent_id > 0)
+		$content .= '<br/>';
 
 	fakeRunning($record);
 

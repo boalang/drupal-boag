@@ -186,6 +186,9 @@ function boa_schema() {
             'uid' => array(
                 'uid',
             ),
+            'children' => array(
+                'parent_id',
+            ),
             'job_poller' => array(
                 'compiler_status',
                 'input',
