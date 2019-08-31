@@ -160,6 +160,23 @@ function boa_status_access($jobId) {
 	return $result->rowCount() == 1;
 }
 
+function boa_output_access_rpc($jobId) {
+	$query = db_select('boa_jobs', 'r');
+	$query->fields('r', array('hadoop_status', 'compiler_status'));
+	$query->addExpression('unix_timestamp(compile_end)', 'compile_end');
+	$query->addExpression('unix_timestamp(hadoop_end)', 'hadoop_end');
+	$query->condition('r.id', $jobId);
+	$result = $query->execute();
+
+	if ($result->rowCount() == 0)
+		return false;
+
+	$record = $result->fetchObject();
+	fakeRunning($record);
+
+	return $record->hadoop_status == 2;
+}
+
 function boa_output_access($jobId) {
 	$query = db_select('boa_jobs', 'r');
 	$query->join('boa_output', 'o', 'r.id = o.id');

@@ -9,8 +9,11 @@ function _job_output_size_rpc($jobId) {
 	$query->addExpression('COALESCE(o.length, 0)', 'length');
 	$query->condition('r.id', $jobId);
 
-	$record = $query->execute()->fetchObject();
+	$result = $query->execute();
+	if ($result->rowCount() == 0)
+		return 0;
 
+	$record = $result->fetchObject();
 	return $record->length;
 }
 
