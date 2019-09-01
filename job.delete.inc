@@ -16,10 +16,10 @@ function boa_job_delete($form, &$form_state, $jobId) {
 		'#value' => $jobId,
 	);
 
-	return confirm_form($form, t('Are you sure you want to delete this job?'), 'boa/job/' . $jobId, t('This action cannot be undone.'), t('Delete'), t('Cancel'));
+	return confirm_form($form, t('Are you sure you want to delete this job?'), 'boa/job/' . $jobId, t('This action cannot be undone.'), t('Delete'), t('Cancel'), 'boa_job_delete');
 }
 
-function boa_delete_job_submit($form, &$form_state) {
+function boa_job_delete_submit($form, &$form_state) {
 	$jobId = $form_state['values']['jobid'];
 
 	if (!isValidJob($jobId))
