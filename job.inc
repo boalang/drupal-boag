@@ -75,7 +75,7 @@ function boa_job($jobId) {
 
 	# -----------------------------------------------
 
-	$content .= '<h2>Source Code</h2>';
+	$content .= '<h2>Source Code <a href="#">^</a></h2>';
 	$content .= '<div class="tabs"><ul class="tabs primary">';
 	$content .= '<li><a class="active" href="">Source Code</a></li>';
 	$content .= '<li><a href="?q=boa/job/' . $record->id . '/download-src">' . t('Download Source') . '</a></li>';
@@ -213,7 +213,7 @@ function generate_content($jobId) {
 	fakeRunning($record);
 	$faked = $faked != $record->hadoop_status;
 
-	$content = '<h2>Compilation</h2>';
+	$content = '<h2>Compilation <a href="#">^</a></h2>';
 	$content .= '<b>Status:</b> ' . showStatus($record->compiler_status);
 	if ($record->compiler_status == 0 || $record->compiler_status == 1)
 		$content .= '<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>';
@@ -238,7 +238,7 @@ function generate_content($jobId) {
 	# -----------------------------------------------
 
 	if ($record->compiler_status == 2) {
-		$content .= '<h2>Execution</h2>';
+		$content .= '<h2>Execution <a href="#">^</a></h2>';
 		$content .= '<b>Status:</b> ' . showStatus($record->hadoop_status);
 		if ($record->hadoop_status == 0 || $record->hadoop_status == 1) {
 			$content .= '<div class="ajax-progress ajax-progress-throbber"><div class="throbber">&nbsp;</div></div>';
