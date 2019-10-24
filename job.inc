@@ -239,7 +239,7 @@ function generate_content($jobId) {
 		$content .= markErrors($matches, "warning");
 	}
 	if (is_boa_admin() && $record->compiler_status != 0 && $record->compiler_status != 1)
-		$content .= '<b>Raw Log Output</b><pre class="output">' . trim($record->compiler_output) . '</pre>';
+		$content .= '<b>Raw Log Output</b><pre class="output">' . htmlspecialchars(trim($record->compiler_output)) . '</pre>';
 
 	# -----------------------------------------------
 
