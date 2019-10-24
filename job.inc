@@ -311,7 +311,7 @@ function markErrors($matches, $errType = "error") {
 JAVASCRIPT;
 
 		$output = $matches[$i][0];
-		if (substr($output, 0, -2) == "at")
+		if (substr($output, -2) == "at")
 			$output = trim(substr($output, 0, -2));
 		if (substr($output, -1) == "\n")
 			$output = trim(substr($output, -1));
