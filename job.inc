@@ -300,6 +300,11 @@ function markErrors($matches, $errType = "error") {
 	for ($i = 0; $i < count($matches); $i++) {
 		$row = $matches[$i][1] - 1;
 		$col = $matches[$i][2];
+		if (strpos($col, "-") !== false) {
+			$cols = explode("-", $col);
+			$col = $cols[0];
+			$endCol = $cols[1];
+		}
 
 		$err = str_replace("\n", '\n', addslashes($matches[$i][3]));
 		$err = str_replace("\\t", '    ', $err);
@@ -326,14 +331,22 @@ JAVASCRIPT;
 		if (substr($output, -1) == "\n")
 			$output = trim(substr($output, 0, -1));
 		$content .= "<pre class=\"output\">" . htmlspecialchars($output) . "</pre>";
+
+		if (isset($endCol))
+			$content .= <<<JAVASCRIPT
+<script type="text/javascript">
+<!--//--><![CDATA[//><!--
+var Range = ace.require('ace/range').Range;
+editor.getSession().addMarker(new Range($row, $col, $row, $endCol + 1), "${errType}Marker", "line", false);
+//--><!]]>
+</script>
+JAVASCRIPT;
 	}
 
 	$content .= <<<JAVASCRIPT
 <script type="text/javascript">
 <!--//--><![CDATA[//><!--
 editor.getSession().setAnnotations([$errors]);
-var Range = ace.require('ace/range').Range;
-//editor.getSession().addMarker(new Range(5, 0, 5, 5), "errorMarker", "line", false);
 //--><!]]>
 </script>
 JAVASCRIPT;
