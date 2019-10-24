@@ -314,7 +314,7 @@ JAVASCRIPT;
 		if (substr($output, -2) == "at")
 			$output = trim(substr($output, 0, -2));
 		if (substr($output, -1) == "\n")
-			$output = trim(substr($output, -1));
+			$output = trim(substr($output, 0, -1));
 		$content .= "<pre class=\"output\">" . htmlspecialchars($output) . "</pre>";
 	}
 
