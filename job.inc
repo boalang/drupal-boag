@@ -332,6 +332,8 @@ JAVASCRIPT;
 <script type="text/javascript">
 <!--//--><![CDATA[//><!--
 editor.getSession().setAnnotations([$errors]);
+var Range = ace.require('ace/range').Range;
+//editor.getSession().addMarker(new Range(5, 0, 5, 5), "errorMarker", "line", false);
 //--><!]]>
 </script>
 JAVASCRIPT;
