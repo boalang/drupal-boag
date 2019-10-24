@@ -105,6 +105,16 @@ editor.setOptions({
 JAVASCRIPT;
 		$content .= <<<CSS
 <style type="text/css" media="all">
+.errorMarker {
+	position: absolute;
+	background: rgba(255,100,100,0.5);
+	z-index: 20
+}
+.warningMarker {
+	position: absolute;
+	background: rgba(255,174,66,0.5);
+	z-index: 20
+}
 #sourcecode {
 	position: relative;
 	width: 96%;
