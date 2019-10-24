@@ -346,7 +346,7 @@ JAVASCRIPT;
 	$content .= <<<JAVASCRIPT
 <script type="text/javascript">
 <!--//--><![CDATA[//><!--
-editor.getSession().setAnnotations([$errors]);
+editor.getSession().setAnnotations(editor.getSession().getAnnotations().concat([$errors]));
 //--><!]]>
 </script>
 JAVASCRIPT;
