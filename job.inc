@@ -107,12 +107,12 @@ JAVASCRIPT;
 <style type="text/css" media="all">
 .errorMarker {
 	position: absolute;
-	background: rgba(255,100,100,0.5);
+	background: rgba(255,0,0,0.3);
 	z-index: 20
 }
 .warningMarker {
 	position: absolute;
-	background: rgba(255,174,66,0.5);
+	background: rgba(255,174,66,0.2);
 	z-index: 20
 }
 #sourcecode {
