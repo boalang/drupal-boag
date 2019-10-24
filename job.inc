@@ -306,7 +306,7 @@ function markErrors($matches, $errType = "error") {
 	row: $row,
 	column: $col,
 	text: "$err",
-	type: $errType
+	type: "$errType"
 }
 JAVASCRIPT;
 
