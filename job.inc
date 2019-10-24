@@ -270,7 +270,7 @@ function generate_content($jobId) {
 			}
 		}
 		if (strlen($record->hadoop_output) && is_boa_admin())
-			$content .= '<b>Raw Log Output</b><pre class="output">' . preg_replace("/^.*Max block location exceeded for split.*\n/m", '', trim($record->hadoop_output)) . '</pre>';
+			$content .= '<b>Raw Log Output</b><pre class="output">' . htmlspecialchars(preg_replace("/^.*Max block location exceeded for split.*\n/m", '', trim($record->hadoop_output))) . '</pre>';
 
 	}
 
@@ -291,7 +291,7 @@ function markErrors($matches, $errType = "error") {
 		$row = $matches[$i][1] - 1;
 		$col = $matches[$i][2];
 
-		$err = str_replace("\n", '\n', addslashes($matches[$i][3]));
+		$err = str_replace("\n", '\n', addslashes(htmlspecialchars($matches[$i][3])));
 		$err = str_replace("\\t", '    ', $err);
 		$err = "Col: $col - " . str_replace(" ", ' ', $err);
 
