@@ -232,6 +232,12 @@ function generate_content($jobId) {
 			$matches = array_merge($matches, $typematches);
 		$content .= markErrors($matches);
 	}
+	if ($record->compiler_status == 2 || $record->compiler_status < 0) {
+		$matches = array();
+		if (preg_match_all('/WARNING at line (\d+), column (\d+):\s*(.*?)\s*/', $record->compiler_output, $warningmatches, PREG_SET_ORDER))
+			$matches = array_merge($matches, $warningmatches);
+		$content .= markErrors($matches, "warning");
+	}
 	if (is_boa_admin() && $record->compiler_status != 0 && $record->compiler_status != 1)
 		$content .= '<b>Raw Log Output</b><pre class="output">' . trim($record->compiler_output) . '</pre>';
 
@@ -271,7 +277,10 @@ function generate_content($jobId) {
 	return $content;
 }
 
-function markErrors($matches) {
+//	errType: "error"
+//	errType: "warning"
+//	errType: "info"
+function markErrors($matches, $errType = "error") {
 	if (count($matches) == 0)
 		return "";
 
@@ -297,9 +306,7 @@ function markErrors($matches) {
 	row: $row,
 	column: $col,
 	text: "$err",
-	type: "error"
-//	type: "warning"
-//	type: "info"
+	type: $errType
 }
 JAVASCRIPT;
 
