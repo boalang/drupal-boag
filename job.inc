@@ -224,17 +224,17 @@ function generate_content($jobId) {
 		$content .= '<b>Finished:</b> ' . boa_date($record->compile_end) . " (" . boa_duration($record->compile_span) . ")<br/>";
 	if ($record->compiler_status < 0) {
 		$matches = array();
-		if (preg_match_all('/Lexical error at line (\d+), column (\d+).\s*(.*?)\s*\tat/s', $record->compiler_output, $lexicalmatches, PREG_SET_ORDER))
+		if (preg_match_all('/Lexical error at line (\d+), columns? (\d+(-\d+)?).\s*(.*?)\s*\tat/s', $record->compiler_output, $lexicalmatches, PREG_SET_ORDER))
 			$matches = array_merge($matches, $lexicalmatches);
-		if (preg_match_all('/Encountered .*? at line (\d+), column (\d+).\s*(.*?)\s*\tat/s', $record->compiler_output, $parsematches, PREG_SET_ORDER))
+		if (preg_match_all('/Encountered .*? at line (\d+), columns? (\d+(-\d+)?).\s*(.*?)\s*\tat/s', $record->compiler_output, $parsematches, PREG_SET_ORDER))
 			$matches = array_merge($matches, $parsematches);
-		if (preg_match_all('/Error at lines (\d+)-\d+, columns (\d+)-\d+:\s*(.*?)\s*\tat/s', $record->compiler_output, $typematches, PREG_SET_ORDER))
+		if (preg_match_all('/Error at lines (\d+)-\d+, columns (\d+-\d+):\s*(.*?)\s*\tat/s', $record->compiler_output, $typematches, PREG_SET_ORDER))
 			$matches = array_merge($matches, $typematches);
 		$content .= markErrors($matches);
 	}
 	if ($record->compiler_status == 2 || $record->compiler_status < 0) {
 		$matches = array();
-		if (preg_match_all('/WARNING at line (\d+), column (\d+):\s*(.*)\s*/', $record->compiler_output, $warningmatches, PREG_SET_ORDER))
+		if (preg_match_all('/WARNING at line (\d+), columns? (\d+(-\d+)?):\s*(.*)\s*/', $record->compiler_output, $warningmatches, PREG_SET_ORDER))
 			$matches = array_merge($matches, $warningmatches);
 		$content .= markErrors($matches, "warning");
 	}
