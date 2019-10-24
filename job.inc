@@ -234,7 +234,7 @@ function generate_content($jobId) {
 	}
 	if ($record->compiler_status == 2 || $record->compiler_status < 0) {
 		$matches = array();
-		if (preg_match_all('/WARNING at line (\d+), column (\d+):\s*(.*?)\s*/', $record->compiler_output, $warningmatches, PREG_SET_ORDER))
+		if (preg_match_all('/WARNING at line (\d+), column (\d+):\s*(.*)\s*/', $record->compiler_output, $warningmatches, PREG_SET_ORDER))
 			$matches = array_merge($matches, $warningmatches);
 		$content .= markErrors($matches, "warning");
 	}
@@ -291,7 +291,7 @@ function markErrors($matches, $errType = "error") {
 		$row = $matches[$i][1] - 1;
 		$col = $matches[$i][2];
 
-		$err = str_replace("\n", '\n', addslashes(htmlspecialchars($matches[$i][3])));
+		$err = str_replace("\n", '\n', addslashes($matches[$i][3]));
 		$err = str_replace("\\t", '    ', $err);
 		$err = "Col: $col - " . str_replace(" ", ' ', $err);
 
