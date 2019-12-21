@@ -720,7 +720,7 @@ BOA;
 $example_names['reaching'] = t('Reaching Definitions');
 $example_jobs['reaching'] = 62922;
 $examples['reaching'] = <<<BOA
-m: output collection[string][int][int] of string;
+m: output collection[string][string][int] of string;
 
 # program analysis output
 type T = set of string;
@@ -796,7 +796,7 @@ visit(input, visitor {
 	}
 	before node: Method -&gt; {
 		cfg := getcfg(node);
-		m_name = method.name;
+		m_name = node.name;
 
 		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.HYBRID, cfg_def);
 		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.HYBRID, cfg_reach_def, fixp1);
@@ -813,7 +813,7 @@ BOA;
 $example_names['livevars'] = t('Live Variables');
 $example_jobs['livevars'] = 62919;
 $examples['livevars'] = <<<BOA
-m: output collection[string][int][int] of string;
+m: output collection[string][string][int] of string;
 
 # program analysis output
 type T = set of string;
@@ -877,7 +877,7 @@ visit(input, visitor {
 	}
 	before node: Method -&gt; {
 		cfg := getcfg(node);
-		m_name = method.name;
+		m_name = node.name;
 
 		traverse(cfg, TraversalDirection.BACKWARD, TraversalKind.HYBRID, init);
 		traverse(cfg, TraversalDirection.BACKWARD, TraversalKind.HYBRID, live, fixp1);
