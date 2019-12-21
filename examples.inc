@@ -718,7 +718,7 @@ BOA;
 # ------------------------------------------------------------------------------------ #
 
 $example_names['reaching'] = t('Reaching Definitions');
-$example_jobs['reaching'] = 62922;
+$example_jobs['reaching'] = 86424;
 $examples['reaching'] = <<<BOA
 m: output collection[string][string][int] of string;
 
@@ -796,7 +796,7 @@ visit(input, visitor {
 	}
 	before node: Method -&gt; {
 		cfg := getcfg(node);
-		m_name = node.name;
+		m_name = current(Declaration).name + "::" + node.name;
 
 		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.HYBRID, cfg_def);
 		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.HYBRID, cfg_reach_def, fixp1);
@@ -811,7 +811,7 @@ BOA;
 # ------------------------------------------------------------------------------------ #
 
 $example_names['livevars'] = t('Live Variables');
-$example_jobs['livevars'] = 62919;
+$example_jobs['livevars'] = 86423;
 $examples['livevars'] = <<<BOA
 m: output collection[string][string][int] of string;
 
@@ -877,7 +877,7 @@ visit(input, visitor {
 	}
 	before node: Method -&gt; {
 		cfg := getcfg(node);
-		m_name = node.name;
+		m_name = current(Declaration).name + "::" + node.name;
 
 		traverse(cfg, TraversalDirection.BACKWARD, TraversalKind.HYBRID, init);
 		traverse(cfg, TraversalDirection.BACKWARD, TraversalKind.HYBRID, live, fixp1);
@@ -985,7 +985,7 @@ $example_options = array(
 		'npm' => $example_names['npm'],
 	),
 	'Program Analysis' => array(
-		'dominator' => $example_names['dominator'],
+		//'dominator' => $example_names['dominator'],
 		'livevars' => $example_names['livevars'],
 		'reaching' => $example_names['reaching'],
 	),
