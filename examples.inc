@@ -652,7 +652,7 @@ BOA;
 # ------------------------------------------------------------------------------------ #
 
 $example_names['dominator'] = t('Dominator Analysis');
-$example_jobs['dominator'] = 62915;
+$example_jobs['dominator'] = 86426;
 $examples['dominator'] = <<<BOA
 op: output collection[string][string][string] of string;
 
@@ -699,8 +699,9 @@ visit(input, visitor {
 	before method: Method -&gt; {
 		cfg := getcfg(method);
 
-		for (i := 0; i &lt; len(cfg.nodes); i++)
-			add(allNodeIds, string(i));
+		if (def(cfg))
+			for (i := 0; i &lt; len(cfg.nodes); i++)
+				add(allNodeIds, string(i));
 
 		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.REVERSEPOSTORDER, dominators, fp);
 		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.ITERATIVE, collect);
@@ -985,7 +986,7 @@ $example_options = array(
 		'npm' => $example_names['npm'],
 	),
 	'Program Analysis' => array(
-		//'dominator' => $example_names['dominator'],
+		'dominator' => $example_names['dominator'],
 		'livevars' => $example_names['livevars'],
 		'reaching' => $example_names['reaching'],
 	),
