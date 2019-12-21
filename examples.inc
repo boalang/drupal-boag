@@ -651,6 +651,246 @@ BOA;
 
 # ------------------------------------------------------------------------------------ #
 
+$example_names['dominator'] = t('Dominator Analysis');
+$example_jobs['dominator'] = 62915;
+$examples['dominator'] = <<<BOA
+op: output collection[string][string][string] of string;
+
+type T = set of string;
+allNodeIds: T;
+
+dominators := traversal(node: CFGNode): T {
+	doms: T;
+
+	if (def(getvalue(node))) {
+		doms = getvalue(node);
+	} else {
+		if (node.id == 0)
+			add(doms, string(node.id));
+		else
+			doms = clone(allNodeIds);
+	}
+
+	foreach(i: int; def(getvalue(node.predecessors[i])))
+		doms = intersect(doms, getvalue(node.predecessors[i]));
+	add(doms, string(node.id));
+
+	return doms;
+};
+
+fp := fixp(curr, prev: T): bool {
+	return curr == prev;
+};
+
+doms: map[string] of T;
+
+collect := traversal(node: CFGNode) {
+	if (def(getvalue(node, dominators)))
+		doms[string(node.id)] = getvalue(node, dominators);
+};
+
+visit(input, visitor {
+	before node: CodeRepository -&gt; {
+		snapshot := getsnapshot(node);
+		foreach (i: int; def(snapshot[i]))
+			visit(snapshot[i]);
+		stop;
+	}
+	before method: Method -&gt; {
+		cfg := getcfg(method);
+
+		for (i := 0; i &lt; len(cfg.nodes); i++)
+			add(allNodeIds, string(i));
+
+		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.REVERSEPOSTORDER, dominators, fp);
+		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.ITERATIVE, collect);
+
+		op[input.project_url][current(ChangedFile).name][method.name] &lt;&lt; string(doms);
+
+		clear(dominators);
+		clear(collect);
+		clear(doms);
+		clear(allNodeIds);
+	}
+});
+BOA;
+
+# ------------------------------------------------------------------------------------ #
+
+$example_names['reaching'] = t('Reaching Definitions');
+$example_jobs['reaching'] = 62922;
+$examples['reaching'] = <<<BOA
+m: output collection[string][int][int] of string;
+
+# program analysis output
+type T = set of string;
+type T_gen_kill = { gen: string, kill: string };
+type T_inout = { in: T, out: T };
+
+m_name: string;
+
+# traversal that accumulates generated values
+cfg_def := traversal(node: CFGNode) : T_gen_kill {
+	cur_val: T_gen_kill = { "", "" };
+	if (node.defVariables != "") {
+		cur_val.gen = node.defVariables + "@" + string(node.id);
+		cur_val.kill = node.defVariables;
+	}
+	return cur_val;
+};
+
+# cfg reaching definition analysis
+cfg_reach_def := traversal(n: CFGNode): T_inout {
+	cur_val: T_inout;
+	if (def(getvalue(n))) {
+		cur_val = getvalue(n);
+	} else {
+		in_set: T;
+		out_set: T;
+		cur_val = { in_set, out_set };
+	}
+
+	preds := n.predecessors;
+	foreach (i: int; def(preds[i])) {
+		pred := getvalue(preds[i]);
+		if (def(pred))
+			cur_val.in = union(cur_val.in, pred.out);
+	}
+
+	cur_val.out = clone(cur_val.in);
+	genkill := getvalue(n, cfg_def);
+
+	if (genkill.kill != "") {
+		tmp_out := values(cur_val.out);
+
+		foreach (i: int; def(tmp_out[i])) {
+			tmp1 := clone(tmp_out[i]);
+			str_array := splitall(tmp1, "@");
+
+			if (str_array[0] == genkill.kill)
+				remove(cur_val.out, tmp1);
+		}
+		add(cur_val.out, genkill.gen);
+	}
+	return cur_val;
+};
+
+result := traversal(node: CFGNode) {
+	if (def(getvalue(node, cfg_reach_def)))
+		m[input.project_url][m_name][node.id] &lt;&lt; string(getvalue(node, cfg_reach_def).out);
+};
+
+# user-defined fix point function that is used for analysis termination.
+fixp1 := fixp(curr, prev: T_inout) : bool {
+	if (len(difference(curr.out, prev.out)) == 0)
+		return true;
+	return false;
+};
+
+visit(input, visitor {
+	before node: CodeRepository -&gt; {
+		snapshot := getsnapshot(node, "SOURCE_JAVA_JLS");
+		foreach (i: int; def(snapshot[i]))
+			visit(snapshot[i]);
+		stop;
+	}
+	before node: Method -&gt; {
+		cfg := getcfg(node);
+		m_name = method.name;
+
+		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.HYBRID, cfg_def);
+		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.HYBRID, cfg_reach_def, fixp1);
+		traverse(cfg, TraversalDirection.FORWARD, TraversalKind.HYBRID, result);
+
+		clear(cfg_def);
+		clear(cfg_reach_def);
+	}
+});
+BOA;
+
+# ------------------------------------------------------------------------------------ #
+
+$example_names['livevars'] = t('Live Variables');
+$example_jobs['livevars'] = 62919;
+$examples['livevars'] = <<<BOA
+m: output collection[string][int][int] of string;
+
+# program analysis output
+type T = set of string;
+type T_gen_kill = { gen: T, kill: string };
+type T_inout = { in: T, out: T };
+
+m_name: string;
+
+# traversal that gets all variable uses in a method
+init := traversal(node: CFGNode) : T_gen_kill {
+	cur_value: T_gen_kill;
+	cur_value = { node.useVariables, node.defVariables };
+	return cur_value;
+};
+
+# cfg live variable analysis
+live := traversal(node: CFGNode) : T_inout {
+	cur_val: T_inout;
+	if (def(getvalue(node))) {
+		cur_val = getvalue(node);
+	} else {
+		in_set: T;
+		out_set: T;
+		cur_val = { in_set, out_set };
+	}
+
+	succs := node.successors;
+	foreach(i:int; def(succs[i])) {
+		succ := getvalue(succs[i]);
+		if (def(succ)) {
+			cur_val.out = union(cur_val.out,succ.in);
+		}
+	}
+	gen_kill := getvalue(node, init);
+	if (def(gen_kill)) {
+		remove(cur_val.out, gen_kill.kill);
+		cur_val.in = union(gen_kill.gen, cur_val.out);
+	}
+	return cur_val;
+};
+
+result := traversal(node: CFGNode) {
+	if (def(getvalue(node, live))) {
+		m[input.project_url][m_name][node.id] &lt;&lt; string(getvalue(node, live).in);
+	}
+};
+
+# user-defined fix point function that is used for analysis termination.
+fixp1 := fixp(curr, prev: T_inout) : bool {
+	if (len(difference(curr.in, prev.in)) == 0)
+		return true;
+	return false;
+};
+
+visit(input, visitor {
+	before node: CodeRepository -&gt; {
+		snapshot := getsnapshot(node, "SOURCE_JAVA_JLS");
+		foreach (i: int; def(snapshot[i]))
+			visit(snapshot[i]);
+		stop;
+	}
+	before node: Method -&gt; {
+		cfg := getcfg(node);
+		m_name = method.name;
+
+		traverse(cfg, TraversalDirection.BACKWARD, TraversalKind.HYBRID, init);
+		traverse(cfg, TraversalDirection.BACKWARD, TraversalKind.HYBRID, live, fixp1);
+		traverse(cfg, TraversalDirection.BACKWARD, TraversalKind.HYBRID, result);
+
+		clear(init);
+		clear(live);
+	}
+});
+BOA;
+
+# ------------------------------------------------------------------------------------ #
+
 $example_names['java-build'] = t('How often are popular Java build systems used?');
 $example_jobs['java-build'] = 63197;
 $examples['java-build'] = <<<BOA
@@ -743,6 +983,11 @@ $example_options = array(
 	'Software Engineering Metrics' => array(
 		'noa' => $example_names['noa'],
 		'npm' => $example_names['npm'],
+	),
+	'Program Analysis' => array(
+		'dominator' => $example_names['dominator'],
+		'livevars' => $example_names['livevars'],
+		'reaching' => $example_names['reaching'],
 	),
 );
 
