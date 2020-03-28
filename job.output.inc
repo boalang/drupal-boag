@@ -23,7 +23,7 @@ function boa_job_output($jobId) {
 			$content = "";
 			if ($trimmed)
 				$content .= "\nNote: Output is <b>" . formatBytes($record->length) . "</b>, only showing first 64k\n";
-			$content = _print_table($record->web_result);
+			$content .= _print_table($record->web_result);
 			if ($trimmed)
 				$content .= "... remaining output not shown, please <a href=\"?q=boa/job/$jobId/download\">download output</a>.\n";
 
