@@ -59,7 +59,7 @@ function _print_table($table) {
 					$content .= "</table>\n";
 				if ($content != '')
 					$content .= "</pre>\n";
-				$content .= "<pre>";
+				$content .= "<pre style=\"overflow-x: auto;\">";
 			}
 			$content .= '<b>' . str_replace('[] = ', '</b> = ', htmlspecialchars($row)) . "\n";
 			$prevTable = false;
