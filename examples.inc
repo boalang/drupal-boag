@@ -8,9 +8,13 @@ if (!function_exists('t')) {
 
 # ------------------------------------------------------------------------------------ #
 
-$example_names['q1'] = t('Example Title');
-$example_jobs['q1'] = 226;
+$example_names['q1'] = t('What are the number of taxonomic assignment for each protein sequence in the NR database?');
+$example_jobs['q1'] = 1;
 $examples['q1'] = <<<BOA
+s: Sequence = input;
+counts: output sum[string][string] of int;
+foreach(i:int; def(s.annotation[i]))
+	counts [s.seqid][s.annotation[i].tax_name] <<  1;
 BOA;
 
 # ------------------------------------------------------------------------------------ #
