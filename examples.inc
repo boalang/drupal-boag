@@ -83,25 +83,11 @@ s: Sequence = input;
 phylCount: output sum [string] of int;
 
 taxs := {
-    "Acanthocephala", "Acoelomorpha","Annelida","Arthropoda","Brachiopoda","Bryozoa","Chaetognatha","Chordata",
-    "Cnidaria","Ctenophora","Cycliophora", "Echinodermata","Entoprocta", "Gastrotricha","Gnathostomulida", "Hemichordata","Kinorhyncha",
-    "Loricifera","Micrognathozoa", "Mollusca","Nematoda", "Nematomorpha","Nemertea", "Onychophora","Orthonectida", "Phoronida",
-    "Placozoa", "Platyhelminthes","Porifera", "Priapulida","Rhombozoa", "Rotifera","Sipuncula", "Tardigrada","Xenacoelomorpha",
-
-    "Anthocerotophyta","Bryophyta", "Charophyta","Chlorophyta", "Cycadophyta","Ginkgophyta", "Glaucophyta","Gnetophyta", "Lycopodiophyta",
-    "Lycophyta", "Magnoliophyta","Marchantiophyta", "Hepatophyta","Pinophyta", "Coniferophyta","Pteridophyta", "Rhodophyta",
-
-    "Ascomycota", "Basidiomycota","Blastocladiomycota", "Chytridiomycota","Glomeromycota", "Microsporidia","Neocallimastigomycota","Zygomycota",
-
-    "Amoebozoa", "Bigyra","Cercozoa", "Choanozoa","Ciliophora", "Cryptista","Euglenozoa", "Foraminifera","Haptophyta", "Loukozoa",
-    "Metamonada", "Microsporidia","Myzozoa", "Mycetozoa","Ochrophyta", "Oomycota","Percolozoa", "Radiozoa","Sarcomastigophora", "Sulcozoa",
-
-    "Acidobacteria", "Actinobacteria","Aquificae", "Armatimonadetes","Bacteroidetes", "Caldiserica","Chlamydiae", "Chlorobi",
-    "Chloroflexi", "Chrysiogenetes","Cyanobacteria", "Deferribacteres","Deinococcus-Thermus", "Dictyoglomi","Elusimicrobia",
-    "Fibrobacteres","Firmicutes", "Fusobacteria","Gemmatimonadetes", "Lentisphaerae","Nitrospira", "Planctomycetes","Proteobacteria",
-     "Spirochaetes","Synergistetes", "Tenericutes","Thermodesulfobacteria", "Thermotogae","Verrucomicrobia",
-
-     "Crenarchaeota","Euryarchaeota", "Korarchaeota","Nanoarchaeota", "Thaumarchaeota"
+    "Anthocerotophyta","Bryophyta", "Magnoliophyta","Pinophyta", "Coniferophyta","Pteridophyta", "Rhodophyta",
+    "Amoebozoa", "Bigyra","Cercozoa", "Choanozoa","Ciliophora", "Cryptista","Euglenozoa", "Foraminifera",
+    "Acidobacteria", "Actinobacteria","Aquificae", "Armatimonadetes",
+    "Chloroflexi", "Chrysiogenetes","Cyanobacteria", "Deferribacteres","Deinococcus-Thermus",
+    "Fibrobacteres","Firmicutes", "Fusobacteria","Gemmatimonadetes", "Lentisphaerae",
 };
 
 for (j := 0; j < len(taxs); j++)
