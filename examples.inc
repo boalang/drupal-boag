@@ -139,6 +139,7 @@ $example_options = array(
 	 'q5' => $example_names['q5'],
 	 'q6' => $example_names['q6'],
 	 'q7' => $example_names['q7'],
+	 'q8' => $example_names['q8'],
 );
 
 ?>
