@@ -98,19 +98,35 @@ BOA;
 
 # ------------------------------------------------------------------------------------ #
 
-$example_names['q7'] = t('What are proteins that do not have a taxonomic assignment?');
+$example_names['q7'] = t('What are the list of taxonomic assignment for all proteins in NR?');
 $example_jobs['q7'] = 7;
 $examples['q7'] = <<<BOA
+s: Sequence = input;
+clstrOut : output collection [string] of string;
+getTaxList := function(seq: Sequence):string {
+taxids :="";
+foreach(i:int; def(s.annotation[i])){
+    if (s.annotation[i].tax_name !="")
+    taxids = taxids + s.annotation[i].tax_id + " ";}
+    return taxids ;
+};
+foreach(i:int; def(s.cluster[i]))
+    if (s.cluster[i].similarity==95 && s.cluster[i].representative)
+        clstrOut [s.seqid] <<  getTaxList(s);
+BOA;
+
+
+# ------------------------------------------------------------------------------------ #
+
+$example_names['q8'] = t('What are proteins that do not have a taxonomic assignment?');
+$example_jobs['q8'] = 8;
+$examples['q8'] = <<<BOA
 s: Sequence = input;
 countNull : output sum of int;
 if (s.annotation[i].tax_name =="")
   countNull  <<1;
 
 BOA;
-
-
-# ------------------------------------------------------------------------------------ #
-
 
 # ------------------------------------------------------------------------------------ #
 
