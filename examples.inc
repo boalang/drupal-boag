@@ -89,17 +89,14 @@ taxs := {
     "Chloroflexi", "Chrysiogenetes","Cyanobacteria", "Deferribacteres","Deinococcus-Thermus",
     "Fibrobacteres","Firmicutes", "Fusobacteria","Gemmatimonadetes", "Lentisphaerae",
 };
-
 for (j := 0; j < len(taxs); j++)
 	exists(i: int; match(taxs[j], s.annotation[i].tax_name))
 	 	 phylCount [taxs[j]] << 1;
-
 BOA;
-
 # ------------------------------------------------------------------------------------ #
 
 $example_names['q7'] = t('What are the list of taxonomic assignment for all proteins in NR?');
-$example_jobs['q7'] = 7;
+$example_jobs['q7'] = 31;
 $examples['q7'] = <<<BOA
 s: Sequence = input;
 clstrOut : output collection [string] of string;
@@ -125,7 +122,6 @@ s: Sequence = input;
 countNull : output sum of int;
 if (s.annotation[i].tax_name =="")
   countNull  <<1;
-
 BOA;
 
 # ------------------------------------------------------------------------------------ #
