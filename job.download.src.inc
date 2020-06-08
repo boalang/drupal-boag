@@ -30,7 +30,7 @@ function boa_job_download_src($jobId) {
 
 	drupal_add_http_header('Content-Type', 'text; utf-8');
 	drupal_add_http_header('Content-Length', $record->result_length);
-	drupal_add_http_header('Content-Disposition', "attachment; filename=\"boa-job$jobId-source.boa\"");
+	drupal_add_http_header('Content-Disposition', "attachment; filename=\"boag-job$jobId-source.boa\"");
 
 	print $record->source;
 

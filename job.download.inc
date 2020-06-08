@@ -33,18 +33,18 @@ function _job_output_rpc($jobId) {
 		return t('The job has no output.');
 
 	$dstdir = $jobId . '/' . $record->hash;
-	$filename = "boa-job$jobId-output.txt";
+	$filename = "boag-job$jobId-output.txt";
 
 	$dir = '/home/boa/www/boa/output/' . $dstdir;
 	$path = $dir . '/' . $filename;
 
 	if (!file_exists($path) || $record->length != filesize($path)) {
-		$tmp = tempnam("/tmp", "boa-output");
+		$tmp = tempnam("/tmp", "boag-output");
 		@unlink($tmp);
 		drupal_register_shutdown_function('download_tmp_cleanup', $tmp);
 
 		set_time_limit(0);
-		system("/home/hadoop/hadoop-current/bin/hadoop fs -getmerge /boa/$jobId/ $tmp");
+		system("/home/hadoop/hadoop-current/bin/hadoop fs -getmerge /boag/$jobId/ $tmp");
 
 		@mkdir($dir, 0700, true);
 		rename($tmp, $path);
@@ -77,17 +77,17 @@ function _download_job($jobId, $fallbackUrl) {
 
 	if ($record->hadoop_status == 2) {
 		if ($record->length > 0) {
-			$tmp = tempnam("/tmp", "boa-output");
+			$tmp = tempnam("/tmp", "boag-output");
 			@unlink($tmp);
 			drupal_register_shutdown_function('download_tmp_cleanup', $tmp);
 
 			set_time_limit(0);
-			system("/home/hadoop/hadoop-current/bin/hadoop fs -getmerge /boa/$jobId/ $tmp");
+			system("/home/hadoop/hadoop-current/bin/hadoop fs -getmerge /boag/$jobId/ $tmp");
 			$file = fopen($tmp, 'r');
 
 			drupal_add_http_header('Content-Type', 'text; utf-8');
 			drupal_add_http_header('Content-Length', $record->length);
-			drupal_add_http_header('Content-Disposition', "attachment; filename=\"boa-job$jobId-output.txt\"");
+			drupal_add_http_header('Content-Disposition', "attachment; filename=\"boag-job$jobId-output.txt\"");
 
 			while (!feof($file)) {
 				print fread($file, 65536);
