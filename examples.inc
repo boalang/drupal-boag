@@ -8,13 +8,15 @@ if (!function_exists('t')) {
 
 # ------------------------------------------------------------------------------------ #
 
-$example_names['q1'] = t('What are the number of taxonomic assignment for each protein sequence in the NR database?');
+$example_names['q1'] = t('What are proteins in the NR database that have taxonomic name "Escherichia coli"?');
 $example_jobs['q1'] = 1;
 $examples['q1'] = <<<BOA
 s: Sequence = input;
-counts: output sum[string][string] of int;
+count : output sum[string] of int;
+
 foreach(i:int; def(s.annotation[i]))
-	counts [s.seqid][s.annotation[i].tax_name] <<  1;
+ if (strfind( "Escherichia coli", s.annotation[i].tax_name) > -1)
+   count[s.seqid]  << 1;
 BOA;
 
 # ------------------------------------------------------------------------------------ #
@@ -23,24 +25,37 @@ $example_names['q2'] = t('What are the list of conserved proteins?');
 $example_jobs['q2'] = 2;
 $examples['q2'] = <<<BOA
 s: Sequence = input;
-protOut : output sum [string] of int;
-# We defined conserved as proteins that have more than 10 distinct taxa
-if (len(s.annotation) > 10){
-  foreach(i:int; def(s.annotation[i]))
-   protOut [s.annotation[i].defline] << 1;
+protOut : output sum [string][string] of int;
+
+distinctTax := function (seq: Sequence): int{
+  taxSet : set of string;
+  foreach(i:int; def(seq.annotation[i]))
+    add(taxSet,seq.annotation[i].tax_id);
+  return(len(taxSet));
+};
+
+# we define conserved proteins as those who have > 10 distinct taxonomic assignments
+if (distinctTax(s) > 10){
+ foreach(i:int; def(s.annotation[i])){
+   if (strfind("[",s.annotation[i].defline)> 0)
+    protOut [trim(substring(s.annotation[i].defline, 0, strfind("[",s.annotation[i].defline)))][s.seqid] << 1;
+   else
+    protOut [s.annotation[i].defline][s.seqid]<<1;
+  }
 }
 BOA;
 
 # ------------------------------------------------------------------------------------ #
 
-$example_names['q3'] = t('What are the frequencies of taxonomic assignments in clusters with different similarity level?');
+$example_names['q3'] = t('What are protein sequences and the frequencies of coronavirus in taxonomic assignments?');
 $example_jobs['q3'] = 3;
 $examples['q3'] = <<<BOA
 s: Sequence = input;
-clstrOut : output sum [int][string][string] of int;
+count : output sum[string][string] of int;
+
 foreach(i:int; def(s.annotation[i]))
-   foreach(j:int; def(s.cluster[j]))
-   	 clstrOut[s.cluster[j].similarity][s.cluster[j].cid] [s.annotation[i].tax_name]<< 1;
+ if (strfind( "coronavirus", s.annotation[i].tax_name) > -1)
+   count[s.seqid][s.annotation[i].tax_name]  << 1;
 BOA;
 
 # ------------------------------------------------------------------------------------ #
@@ -64,13 +79,10 @@ $examples['q5'] = <<<BOA
 s: Sequence = input;
 counts_protein: output collection[string][string] of int;
 
-foreach(i:int; def(s.cluster[i])){
-  if (s.cluster[i].similarity==95){
-    foreach(j:int; def(s.annotation[j]))
-			if (match(`SCN`,s.annotation[j].defline))
-			  counts_protein [s.seqid][s.cluster[i].cid] <<1;
-		  }
-	}
+foreach(i:int; def(s.cluster[i]))
+  if (s.cluster[i].similarity==95)
+      if (strfind( "SCN", s.annotation[i].defline) > -1)
+		counts_protein [s.seqid][s.cluster[i].cid] <<1;
 BOA;
 
 # ------------------------------------------------------------------------------------ #
@@ -82,13 +94,7 @@ $examples['q6'] = <<<BOA
 s: Sequence = input;
 phylCount: output sum [string] of int;
 
-taxs := {
-    "Anthocerotophyta","Bryophyta", "Magnoliophyta","Pinophyta", "Coniferophyta","Pteridophyta", "Rhodophyta",
-    "Amoebozoa", "Bigyra","Cercozoa", "Choanozoa","Ciliophora", "Cryptista","Euglenozoa", "Foraminifera",
-    "Acidobacteria", "Actinobacteria","Aquificae", "Armatimonadetes",
-    "Chloroflexi", "Chrysiogenetes","Cyanobacteria", "Deferribacteres","Deinococcus-Thermus",
-    "Fibrobacteres","Firmicutes", "Fusobacteria","Gemmatimonadetes", "Lentisphaerae",
-};
+taxs := {"Firmicutes", "Fusobacteria"};
 for (j := 0; j < len(taxs); j++)
 	exists(i: int; match(taxs[j], s.annotation[i].tax_name))
 	 	 phylCount [taxs[j]] << 1;
@@ -115,13 +121,14 @@ BOA;
 
 # ------------------------------------------------------------------------------------ #
 
-$example_names['q8'] = t('What are proteins that do not have a taxonomic assignment?');
+$example_names['q8'] = t('How many proteins in NR do not have a taxonomic assignment?');
 $example_jobs['q8'] = 8;
 $examples['q8'] = <<<BOA
 s: Sequence = input;
-countNull : output sum of int;
-if (s.annotation[i].tax_name =="")
-  countNull  <<1;
+countNull: output sum of int;
+foreach (i: int; def(s.annotation[i]))
+    if (s.annotation[i].tax_name == "")
+    	countNull << 1;
 BOA;
 
 # ------------------------------------------------------------------------------------ #
