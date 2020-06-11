@@ -15,8 +15,8 @@ s: Sequence = input;
 count : output sum[string] of int;
 
 foreach(i:int; def(s.annotation[i]))
- if (strfind( "Escherichia coli", s.annotation[i].tax_name) > -1)
-   count[s.seqid]  << 1;
+    if (strfind( "Escherichia coli", s.annotation[i].tax_name) > -1)
+        count[s.seqid]  << 1;
 BOA;
 
 # ------------------------------------------------------------------------------------ #
@@ -28,19 +28,19 @@ s: Sequence = input;
 protOut : output sum [string][string] of int;
 
 distinctTax := function (seq: Sequence): int{
-  taxSet : set of string;
-  foreach(i:int; def(seq.annotation[i]))
-    add(taxSet,seq.annotation[i].tax_id);
-  return(len(taxSet));
+    taxSet : set of string;
+    foreach(i:int; def(seq.annotation[i]))
+        add(taxSet,seq.annotation[i].tax_id);
+    return(len(taxSet));
 };
 
 # we define conserved proteins as those who have > 10 distinct taxonomic assignments
 if (distinctTax(s) > 10){
  foreach(i:int; def(s.annotation[i])){
    if (strfind("[",s.annotation[i].defline)> 0)
-    protOut [trim(substring(s.annotation[i].defline, 0, strfind("[",s.annotation[i].defline)))][s.seqid] << 1;
+        protOut [trim(substring(s.annotation[i].defline, 0, strfind("[",s.annotation[i].defline)))][s.seqid] << 1;
    else
-    protOut [s.annotation[i].defline][s.seqid]<<1;
+        protOut [s.annotation[i].defline][s.seqid]<<1;
   }
 }
 BOA;
@@ -54,8 +54,8 @@ s: Sequence = input;
 count : output sum[string][string] of int;
 
 foreach(i:int; def(s.annotation[i]))
- if (strfind( "coronavirus", s.annotation[i].tax_name) > -1)
-   count[s.seqid][s.annotation[i].tax_name]  << 1;
+    if (strfind( "coronavirus", s.annotation[i].tax_name) > -1)
+        count[s.seqid][s.annotation[i].tax_name]  << 1;
 BOA;
 
 # ------------------------------------------------------------------------------------ #
@@ -67,8 +67,8 @@ s: Sequence = input;
 counts: output sum[int] of int;
 
 foreach(i:int; def(s.cluster[i]))
-  if (s.cluster[i].similarity==95)
-	counts [s.cluster[i].length] <<  1;
+    if (s.cluster[i].similarity==95)
+        counts [s.cluster[i].length] <<  1;
 BOA;
 
 # ------------------------------------------------------------------------------------ #
@@ -81,8 +81,8 @@ counts_protein: output collection[string][string] of int;
 
 foreach(i:int; def(s.cluster[i]))
   if (s.cluster[i].similarity==95)
-      if (strfind( "SCN", s.annotation[i].defline) > -1)
-		counts_protein [s.seqid][s.cluster[i].cid] <<1;
+    if (strfind( "SCN", s.annotation[i].defline) > -1)
+	   counts_protein [s.seqid][s.cluster[i].cid] << 1;
 BOA;
 
 # ------------------------------------------------------------------------------------ #
@@ -108,10 +108,10 @@ s: Sequence = input;
 clstrOut : output collection [string] of string;
 
 getTaxList := function(seq: Sequence):string {
-taxids :="";
-foreach(i:int; def(s.annotation[i])){
-    if (s.annotation[i].tax_name !="")
-    taxids = taxids + s.annotation[i].tax_id + " ";}
+    taxids :="";
+    foreach(i:int; def(s.annotation[i])){
+        if (s.annotation[i].tax_name !="")
+            taxids = taxids + s.annotation[i].tax_id + " ";}
     return taxids ;
 };
 
