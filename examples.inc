@@ -65,10 +65,10 @@ $example_jobs['q4'] = 4;
 $examples['q4'] = <<<BOA
 s: Sequence = input;
 counts: output sum[int] of int;
+
 foreach(i:int; def(s.cluster[i]))
   if (s.cluster[i].similarity==95)
 	counts [s.cluster[i].length] <<  1;
-
 BOA;
 
 # ------------------------------------------------------------------------------------ #
@@ -93,8 +93,8 @@ $examples['q6'] = <<<BOA
 # search for Streptococcus
 s: Sequence = input;
 phylCount: output sum [string] of int;
-
 taxs := {"Firmicutes", "Fusobacteria"};
+
 for (j := 0; j < len(taxs); j++)
 	exists(i: int; match(taxs[j], s.annotation[i].tax_name))
 	 	 phylCount [taxs[j]] << 1;
@@ -106,6 +106,7 @@ $example_jobs['q7'] = 31;
 $examples['q7'] = <<<BOA
 s: Sequence = input;
 clstrOut : output collection [string] of string;
+
 getTaxList := function(seq: Sequence):string {
 taxids :="";
 foreach(i:int; def(s.annotation[i])){
@@ -113,6 +114,7 @@ foreach(i:int; def(s.annotation[i])){
     taxids = taxids + s.annotation[i].tax_id + " ";}
     return taxids ;
 };
+
 foreach(i:int; def(s.cluster[i]))
     if (s.cluster[i].similarity==95 && s.cluster[i].representative)
         clstrOut [s.seqid] <<  getTaxList(s);
@@ -126,6 +128,7 @@ $example_jobs['q8'] = 8;
 $examples['q8'] = <<<BOA
 s: Sequence = input;
 countNull: output sum of int;
+
 foreach (i: int; def(s.annotation[i]))
     if (s.annotation[i].tax_name == "")
     	countNull << 1;
